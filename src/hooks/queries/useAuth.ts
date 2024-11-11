@@ -1,11 +1,12 @@
 import {useMutation, useQuery,} from "@tanstack/react-query";
-import {getAccessToken, getProfile, postLogIn, postSignUp} from "../../api/auth";
+import {getAccessToken, getProfile, logout, postLogIn, postSignUp} from "../../api/auth";
 import {UseMutationCustomOptions, UseQueryCustomOptions} from "../../types/common";
-import {removeEncryptStorage, setEncryptStorage} from "../../utils";
+import {getEncryptStorage, removeEncryptStorage, setEncryptStorage} from "../../utils";
 import {removeHeader, setHeader} from "../../utils/headers";
 import {useEffect} from "react";
 import queryClient from "../../api/queryClient";
 import {numbers, queryKeys, storageKeys} from "../../constants";
+import axiosInstance from "../../api/axios";
 
 function useSignup(mutationOptions?: UseMutationCustomOptions) {
     return useMutation({
@@ -17,10 +18,9 @@ function useSignup(mutationOptions?: UseMutationCustomOptions) {
 function useLogin(mutationOptions?: UseMutationCustomOptions) {
     return useMutation({
         mutationFn: postLogIn,
-        onSuccess: (data) => {
-            setEncryptStorage('refreshToken', storageKeys.REFRESH_TOKEN);// setEncryptStorage('refreshToken', refreshToken);
-            setEncryptStorage('accessToken', data.accessToken);
-
+        onSuccess: ({accessToken, refreshToken}) => {
+            setEncryptStorage('refreshToken', refreshToken);
+            setHeader('Authorization', `Bearer ${accessToken}`);
         },
         onSettled: () => {
             queryClient.refetchQueries({queryKey: [queryKeys.AUTH, queryKeys.GET_ACCESS_TOKEN]});
@@ -65,20 +65,20 @@ function useGetProfile(queryOptions?: UseQueryCustomOptions) {
         ...queryOptions,
     });
 } //로그인 한 뒤에는 프로필도 가져와야함
-//
+
 // function useLogout(mutationOptions?: UseMutationCustomOptions) {
 //     return useMutation({
 //         mutationFn: logout,
 //         onSuccess: () => {
+//             console.log("before storage empty: ", getEncryptStorage(storageKeys.ACCESS_TOKEN));
 //             removeHeader('Authorization');
 //             removeEncryptStorage(storageKeys.REFRESH_TOKEN);
+//             queryClient.resetQueries({queryKey: [queryKeys.AUTH]});
+//             console.log("storage empty: ", getEncryptStorage(storageKeys.ACCESS_TOKEN));
 //         },
-//         onSettled: () => {
-//             queryClient.invalidateQueries({queryKey: [queryKeys.AUTH]});
-//         },
-//         ...mutationOptions
-//     })
-// }
+//         ...mutationOptions,
+//     });
+// } ---> removeEncryptStorgage가 async라 따로 적용함
 
 function useLogout(mutationOptions?: UseMutationCustomOptions) {
     return useMutation({
@@ -86,11 +86,11 @@ function useLogout(mutationOptions?: UseMutationCustomOptions) {
             // 클라이언트에서 직접 로그아웃 처리
             removeHeader('Authorization');
             await removeEncryptStorage(storageKeys.REFRESH_TOKEN);
-            await removeEncryptStorage(storageKeys.ACCESS_TOKEN); // accessToken도 제거
+            // await removeEncryptStorage(storageKeys.ACCESS_TOKEN); // accessToken도 제거
         },
         onSettled: () => {
             // 관련 쿼리 무효화하여 캐시 초기화
-            queryClient.invalidateQueries({ queryKey: [queryKeys.AUTH] });
+            queryClient.invalidateQueries({queryKey: [queryKeys.AUTH]});
         },
         ...mutationOptions
     });
@@ -105,9 +105,6 @@ function useAuth() {
     const isLogin = getProfileQuery.isSuccess;
     const loginMutation = useLogin();
     const logoutMutation = useLogout();
-
-    console.log("useAuth function isLogin in: ", isLogin);
-
 
     return {isLogin, loginMutation, signupMutation, getProfileQuery, logoutMutation};
 }

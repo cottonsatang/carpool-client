@@ -61,29 +61,8 @@ const postSignUp = async (signupData: RequestSignUpUser): Promise<void> => {
 };
 
 const postLogIn = async ({name, password}: RequestUser): Promise<ResponseToken> => {
-    try {
-        const response = await axiosInstance.post("/auth/signin", {
-            name,
-            password
-        });
-        console.log("로그인 성공:", response.data);
-        return response.data;
-    } catch (error) {
-        if (error instanceof AxiosError) {
-            const errorData = error.response?.data as ApiError;
-            console.error("로그인 요청 에러:", {
-                name,
-                error: errorData || error.message
-            });
-            throw new Error(
-                errorData?.message ||
-                error.message ||
-                '로그인에 실패했습니다.'
-            );
-        }
-        console.error("알 수 없는 로그인 에러:", error);
-        throw new Error('로그인 중 문제가 발생했습니다.');
-    }
+    const {data} = await axiosInstance.post('/auth/signin', {name, password});
+    return data;
 };
 
 const getProfile = async (): Promise<ResponseProfile> => {
@@ -102,9 +81,9 @@ const getAccessToken = async (): Promise<ResponseToken> => {
     return data;
 };
 
-// const logout = async () => {
-//     await axiosInstance.get('/auth/logout');
-// };
+const logout = async () => {
+    await axiosInstance.post('/auth/logout');
+};
 
 const sendVerificationCode = async (email: string): Promise<string> => {
     try {
@@ -155,7 +134,7 @@ const verifyCode = async (email: string, code: string): Promise<boolean> => {
 };
 
 
-export {postSignUp, postLogIn, getProfile, getAccessToken, sendVerificationCode, verifyCode}; // logout은 서버에서 구현 안할것 같음
+export {postSignUp, postLogIn, getProfile, getAccessToken, sendVerificationCode, verifyCode, logout}; // logout은 서버에서 구현 안할것 같음
 export type {
     RequestUser,
     RequestSignUpUser,
