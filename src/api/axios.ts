@@ -1,8 +1,8 @@
 import axios from 'axios';
-import {API_URL} from "@env";
+import Config from "react-native-config";
 
 const axiosInstance = axios.create({
-    baseURL: API_URL,
+    baseURL: Config.API_URL,
     withCredentials: true,
 })
 

@@ -1,7 +1,6 @@
 import axiosInstance from "./axios";
 import {Category, Profile} from "../types/domain";
 import {getEncryptStorage} from "../utils";
-import {API_URL} from '@env';
 import {AxiosError} from "axios";
 
 interface ApiError {
@@ -61,8 +60,18 @@ const postSignUp = async (signupData: RequestSignUpUser): Promise<void> => {
 };
 
 const postLogIn = async ({name, password}: RequestUser): Promise<ResponseToken> => {
-    const {data} = await axiosInstance.post('/auth/signin', {name, password});
-    return data;
+    console.log("postLogin - Request:", {
+        method: "POST",
+        data: { name, password }
+    });
+
+    try {
+        const { data } = await axiosInstance.post('/auth/signin', { name, password });
+        return data;
+    } catch (error) {
+        console.error("postLogin - Error:", error);
+        throw new Error('Login request failed');
+    }
 };
 
 const getProfile = async (): Promise<ResponseProfile> => {
@@ -88,8 +97,7 @@ const logout = async () => {
 const sendVerificationCode = async (email: string): Promise<string> => {
     try {
         console.log('Sending verification code request:', email);
-        console.log('주소 확인 :', API_URL)
-        const response = await axiosInstance.post(`/mail/send-code`, {
+        const response = await axiosInstance.post(`http://10.0.2.2:3000/mail/send-code`, {
             email: email.trim()  // 이메일을 서버에 전달
         });
 

@@ -138,8 +138,39 @@ import android.os.Bundle; 명시하기
 https://reactnavigation.org/docs/getting-started <- 공식문서 참조 
 ```
 
+## 안드로이드 네이티브 기능 권한 관련 문서 
+https://developer.android.com/develop/sensors-and-location/location/permissions?hl=ko
+이거 참고해서 추후에 app 폴더 내에 AndroidManifest.xml 조정하기 
+
+## 패키지 의존성 관련 
+네이티브 파일들 관련 건드릴 경우 
+android 폴더로 넘어가서 (root dir 기준 cd android)
+./gradlew clean으로 build 관련 캐시 지우기 
+
+또한 환경변수(혹은 기타 의존성 관련 모듈)들도 라이브러리 코드 변경하거나 직접 수정할 경우
+npm run android --clean-cache로 실행 전에 꼭 캐시 지우기 
+
+필요할 때는 ./gradlew build로 네이티브 코드들 빌드하기 
+
+api_key들은 민감한 개인 정보니깐 절대 유출 금지, react-native-config 설치했으므로 .env로 관리하기(.env.example에 예시 있으므로 따라하기)
+추후에 네이티브 폴더에 환경변수 적용할 경우, build.gradle에서 dependencies 꼭 확인하기 \
 
 
+지도 위치권한 앱 실행시 꼭 하기
+https://github.com/zoontek/react-native-permissions -> 이 레포지토리에서 권한 관련 read.me 읽기
+지도, 사진 같은 경우는 특히나 권한 설정에 민감함 
+
+```
+아이콘 관련 
+https://oblador.github.io/react-native-vector-icons/
+react-native-vector 라이브러리로 아이콘을 이용할건데 필요한거 있다면 여기서 목록 보셔서 고르시는걸 추천합니다
+android/app/build.gradle에서 
+project.ext.vectoricons = [
+    iconFontNames: [ 'MaterialIcons.ttf', 'EvilIcons.ttf' ] <-여기에 원하는 목록 넣기 
+]
+네이티브 코드 수정하면 그래들 관련 캐시 작업 꼭 하기 
+
+```
 
 ```bash
 # using npm

@@ -83,10 +83,9 @@ function useGetProfile(queryOptions?: UseQueryCustomOptions) {
 function useLogout(mutationOptions?: UseMutationCustomOptions) {
     return useMutation({
         mutationFn: async () => {
-            // 클라이언트에서 직접 로그아웃 처리
             removeHeader('Authorization');
             await removeEncryptStorage(storageKeys.REFRESH_TOKEN);
-            // await removeEncryptStorage(storageKeys.ACCESS_TOKEN); // accessToken도 제거
+            queryClient.resetQueries({queryKey: [queryKeys.AUTH]});
         },
         onSettled: () => {
             // 관련 쿼리 무효화하여 캐시 초기화
@@ -103,6 +102,7 @@ function useAuth() {
         enabled: refreshTokenQuery.isSuccess, //refreshToken 요청이 성공하면 프로필 쿼리도 가져오기
     });
     const isLogin = getProfileQuery.isSuccess;
+    console.log("is login in useAuth: ", isLogin);
     const loginMutation = useLogin();
     const logoutMutation = useLogout();
 
