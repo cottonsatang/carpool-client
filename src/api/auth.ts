@@ -2,6 +2,7 @@ import axiosInstance from "./axios";
 import {Category, Profile} from "../types/domain";
 import {getEncryptStorage} from "../utils";
 import {AxiosError} from "axios";
+import Config from "react-native-config";
 
 interface ApiError {
     message: string;
@@ -97,7 +98,8 @@ const logout = async () => {
 const sendVerificationCode = async (email: string): Promise<string> => {
     try {
         console.log('Sending verification code request:', email);
-        const response = await axiosInstance.post(`http://10.0.2.2:3000/mail/send-code`, {
+        console.log("API_URL: ", Config.API_URL);
+        const response = await axiosInstance.post("/mail/send-code", {
             email: email.trim()  // 이메일을 서버에 전달
         });
 
