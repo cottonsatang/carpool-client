@@ -83,17 +83,20 @@ function useGetProfile(queryOptions?: UseQueryCustomOptions) {
 function useLogout(mutationOptions?: UseMutationCustomOptions) {
     return useMutation({
         mutationFn: async () => {
-            removeHeader('Authorization');
+            const response = await axiosInstance.post('/auth/logout');  // 로그아웃 요청을 서버에 먼저 보냄
+            console.log('Logout response:', response.data); // 요청이 성공했는지 확인
+
+            removeHeader('Authorization');// 요청 성공 후 헤더와 스토리지 정리
             await removeEncryptStorage(storageKeys.REFRESH_TOKEN);
             queryClient.resetQueries({queryKey: [queryKeys.AUTH]});
         },
-        onSettled: () => {
-            // 관련 쿼리 무효화하여 캐시 초기화
+        onSettled: () => {// 관련 쿼리 무효화하여 캐시 초기화
             queryClient.invalidateQueries({queryKey: [queryKeys.AUTH]});
         },
         ...mutationOptions
     });
 }
+
 
 function useAuth() {
     const signupMutation = useSignup();
