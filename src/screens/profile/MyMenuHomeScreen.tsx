@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View, Button } from "react-native";
 import useAuth from "../../hooks/queries/useAuth";
 
-function ProfileHomeScreen() {
+function MyMenuHomeScreen() {
     const { logoutMutation } = useAuth();
 
     const handleLogout = () => {
@@ -30,4 +30,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ProfileHomeScreen;
+export default MyMenuHomeScreen;

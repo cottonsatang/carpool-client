@@ -35,9 +35,21 @@ type ResponseToken = {
     refreshToken: string;
 };
 
-
-type ResponseProfile = Profile & Category;
-
+type ResponseProfile = {
+    name: string;
+    email: string;
+    phoneNumber: string;
+    role: 'driver' | 'passenger';
+    profile: {
+        profilePicture: string;
+        bio: string;
+    };
+    vehicleInfo?: {
+        model: string;
+        licensePlate: string;
+        seatingCapacity: number;
+    };
+};
 
 // API functions
 const postSignUp = async (signupData: RequestSignUpUser): Promise<void> => {
@@ -76,7 +88,6 @@ const postLogIn = async ({name, password}: RequestUser): Promise<ResponseToken> 
 };
 
 const getProfile = async (): Promise<ResponseProfile> => {
-
     const {data} = await axiosInstance.get('/auth/me');
     return data;
 };

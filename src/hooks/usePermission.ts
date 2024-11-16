@@ -1,5 +1,5 @@
 import {useEffect} from 'react';
-import {Alert, Linking, Platform} from 'react-native';
+import {Alert, Linking} from 'react-native';
 import {
   PERMISSIONS,
   request,
@@ -7,6 +7,7 @@ import {
   RESULTS,
   Permission,
 } from 'react-native-permissions';
+import {alerts} from "../constants";
 
 type PermissionType = 'LOCATION' | 'PHOTO';
 
@@ -18,17 +19,6 @@ const androidPermissions: PermissionOs = {
   LOCATION: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
   PHOTO: PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
 };
-
-const alerts = {
-  LOCATION_PERMISSION: {
-    TITLE: '위치 권한 허용이 필요합니다.',
-    DESCRIPTION: '설명 화면에서 위치 권한을 허용해주세요',
-  },
-  PHOTO_PERMISSION: {
-    TITLE: '사진 접근 권한이 필요합니다',
-    DESCRIPTION: '설정 화면에서 사진 권한을 허용해주세요',
-  },
-} as const;
 
 function usePermission(type: PermissionType) {
   useEffect(() => {
@@ -54,9 +44,10 @@ function usePermission(type: PermissionType) {
         );
       };
       switch (checked) {
-        case RESULTS.DENIED:
+        case RESULTS.DENIED:{
           await request(permission);
-          break;
+          return;
+        }
         case RESULTS.BLOCKED:
         case RESULTS.LIMITED:
           showPermissionAlert();

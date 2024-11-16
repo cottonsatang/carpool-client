@@ -19,7 +19,7 @@ function useUserLocation() {
         setUserLocation({latitude, longitude});
         console.log('latitude, longitude', latitude, longitude);
         setIsUserLocationError(false);
-      },
+      }, //appstate 추가
       () => {
         setIsUserLocationError(true);
       },

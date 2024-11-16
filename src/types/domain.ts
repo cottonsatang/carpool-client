@@ -28,7 +28,7 @@ interface Profile {
     id: number;
     email: string;
     name: string | null;
-    imageUri: string | null;
+    imageUrl: string | null;
     loginType: 'name';
 }
 

@@ -62,6 +62,7 @@ function useGetProfile(queryOptions?: UseQueryCustomOptions) {
     return useQuery({
         queryKey: [queryKeys.AUTH, queryKeys.GET_PROFILE],
         queryFn: getProfile,
+        staleTime: Infinity,
         ...queryOptions,
     });
 } //로그인 한 뒤에는 프로필도 가져와야함
@@ -105,7 +106,6 @@ function useAuth() {
         enabled: refreshTokenQuery.isSuccess, //refreshToken 요청이 성공하면 프로필 쿼리도 가져오기
     });
     const isLogin = getProfileQuery.isSuccess;
-    console.log("is login in useAuth: ", isLogin);
     const loginMutation = useLogin();
     const logoutMutation = useLogout();
 

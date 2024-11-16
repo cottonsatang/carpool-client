@@ -4,7 +4,7 @@ import {AppState} from "react-native";
 function useAppState() {
     const appState = useRef(AppState.currentState);
     const [appStateVisibility, setAppStateVisibility] = useState(appState.current);
-    const [isComeBack, setIsComeBack] = useState(true);
+    const [isComeBack, setIsComeBack] = useState(false);
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', nextAppState => {
