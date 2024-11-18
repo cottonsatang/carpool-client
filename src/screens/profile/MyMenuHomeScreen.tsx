@@ -1,33 +1,314 @@
-import React from "react";
-import { StyleSheet, Text, View, Button } from "react-native";
-import useAuth from "../../hooks/queries/useAuth";
+import React, { useState } from "react";
+import {
+    SafeAreaView,
+    StyleSheet,
+    View,
+    Text,
+    ScrollView,
+    Pressable,
+    Image,
+    Alert,
+    TextInput,
+} from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
 
-function MyMenuHomeScreen() {
-    const { logoutMutation } = useAuth();
+function ProfileHomeScreen({ route }: { route: any }) {
+    const navigation = useNavigation();
 
-    const handleLogout = () => {
-        logoutMutation.mutate(null);
+    const initialState = {
+        role: route?.params?.role === "운전자" ? "운전자" : "탑승자",
+        phoneNumber: "01012345678",
+        model: "현대 소나타",
+        licensePlate: "12가1234",
+        seatingCapacity: "4",
+        points: 150,
+    };
+
+    const [state, setState] = useState(initialState);
+    const [phoneNumber, setPhoneNumber] = useState(state.phoneNumber);
+    const [model, setModel] = useState(state.model);
+    const [licensePlate, setLicensePlate] = useState(state.licensePlate);
+    const [seatingCapacity, setSeatingCapacity] = useState(state.seatingCapacity);
+
+    const handleGoBack = () => {
+        Alert.alert(
+          "알림",
+          "변경 사항이 저장되지 않았습니다. 돌아가시겠습니까?",
+          [
+              { text: "확인", onPress: () => navigation.goBack() },
+              { text: "취소", style: "cancel" },
+          ]
+        );
+    };
+
+    const handleSaveChanges = () => {
+        Alert.alert("알림", "변경이 완료되었습니다.");
+        setState({
+            ...state,
+            phoneNumber,
+            model,
+            licensePlate,
+            seatingCapacity,
+        });
+    };
+
+    const handleCancelChanges = () => {
+        Alert.alert(
+          "알림",
+          "변경 내용을 취소하시겠습니까?",
+          [
+              {
+                  text: "확인",
+                  onPress: () => {
+                      setPhoneNumber(state.phoneNumber);
+                      setModel(state.model);
+                      setLicensePlate(state.licensePlate);
+                      setSeatingCapacity(state.seatingCapacity);
+                  },
+              },
+              { text: "취소", style: "cancel" },
+          ]
+        );
+    };
+
+    const handleViewPointsHistory = () => {
+        navigation.navigate("PointsHistoryScreen");
+    };
+
+    const handleViewUsageHistory = () => {
+        navigation.navigate("UsageHistoryScreen");
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Profile Screen</Text>
-            <Button title="로그아웃" onPress={handleLogout} />
-        </View>
+      <SafeAreaView style={styles.container}>
+          {/* 뒤로가기 버튼 */}
+          <Pressable style={styles.backButton} onPress={handleGoBack}>
+              <Icon name="arrow-back" size={24} color="#000" />
+          </Pressable>
+
+          {/* 프로필 정보 */}
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+              <View style={styles.profileHeader}>
+                  <View style={styles.profileImageContainer}>
+                      <Image
+                        source={{ uri: "https://via.placeholder.com/80" }} // 임시 프로필 이미지
+                        style={styles.profileImage}
+                      />
+                  </View>
+                  <Text style={styles.profileName}>닉네임</Text>
+              </View>
+
+              {/* 고정 정보 */}
+              <View style={styles.infoContainer}>
+                  <Text style={styles.infoText}>역할: {state.role}</Text>
+                  <Text style={styles.infoText}>이메일: example@example.com</Text>
+              </View>
+
+              {/* 변경 가능한 정보 */}
+              <View style={styles.editableInfoContainer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="휴대폰 번호 입력"
+                    value={phoneNumber}
+                    onChangeText={(text) => setPhoneNumber(text.replace(/[^0-9]/g, ""))}
+                    keyboardType="numeric"
+                  />
+                  {state.role === "운전자" && (
+                    <>
+                        <TextInput
+                          style={styles.input}
+                          placeholder="차량 모델 입력"
+                          value={model}
+                          onChangeText={setModel}
+                        />
+                        <TextInput
+                          style={styles.input}
+                          placeholder="차량 번호판 입력"
+                          value={licensePlate}
+                          onChangeText={setLicensePlate}
+                        />
+                        <TextInput
+                          style={styles.input}
+                          placeholder="좌석 수 입력"
+                          value={seatingCapacity}
+                          onChangeText={(text) =>
+                            setSeatingCapacity(text.replace(/[^0-9]/g, ""))
+                          }
+                          keyboardType="numeric"
+                        />
+                    </>
+                  )}
+              </View>
+
+              {/* 포인트 내역 및 이용 내역 */}
+              <View style={styles.boxContainer}>
+                  {/* 포인트 내역 */}
+                  <Pressable style={styles.box} onPress={handleViewPointsHistory}>
+                      <View style={styles.iconContainer}>
+                          <Image
+                            source={{ uri: "https://via.placeholder.com/40" }} // 포인트 아이콘
+                            style={styles.icon}
+                          />
+                      </View>
+                      <View style={styles.textContainer}>
+                          <Text style={styles.title}>포인트 내역</Text>
+                          <Text style={styles.subtitle}>포인트 내역 바로가기</Text>
+                      </View>
+                      <Icon name="chevron-forward" size={24} color="#000" />
+                  </Pressable>
+
+                  {/* 이용 내역 */}
+                  <Pressable style={styles.box} onPress={handleViewUsageHistory}>
+                      <View style={styles.iconContainer}>
+                          <Image
+                            source={{ uri: "https://via.placeholder.com/40" }} // 이용 내역 아이콘
+                            style={styles.icon}
+                          />
+                      </View>
+                      <View style={styles.textContainer}>
+                          <Text style={styles.title}>이용 내역</Text>
+                          <Text style={styles.subtitle}>이용 내역 바로가기</Text>
+                      </View>
+                      <Icon name="chevron-forward" size={24} color="#000" />
+                  </Pressable>
+              </View>
+
+              {/* 변경 및 취소 버튼 */}
+              <View style={styles.buttonContainer}>
+                  <Pressable style={styles.saveButton} onPress={handleSaveChanges}>
+                      <Text style={styles.buttonText}>변경</Text>
+                  </Pressable>
+                  <Pressable style={styles.cancelButton} onPress={handleCancelChanges}>
+                      <Text style={styles.buttonText}>취소</Text>
+                  </Pressable>
+              </View>
+          </ScrollView>
+      </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: "#fff",
+    },
+    backButton: {
+        marginTop: 20,
+        marginLeft: 15,
+    },
+    scrollContent: {
+        padding: 20,
+    },
+    profileHeader: {
         alignItems: "center",
+        marginBottom: 20,
+    },
+    profileImageContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: "#ddd",
         justifyContent: "center",
-        padding: 16,
+        alignItems: "center",
+        marginBottom: 10,
+    },
+    profileImage: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 40,
+    },
+    profileName: {
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    infoContainer: {
+        marginVertical: 10,
+    },
+    infoText: {
+        fontSize: 16,
+        marginBottom: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd",
+        paddingVertical: 5,
+    },
+    editableInfoContainer: {
+        marginVertical: 10,
+    },
+    input: {
+        fontSize: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd",
+        paddingVertical: 5,
+        marginBottom: 10,
+    },
+    boxContainer: {
+        marginTop: 20,
+    },
+    box: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#F9F9F9",
+        padding: 15,
+        borderRadius: 10,
+        marginBottom: 15,
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+    },
+    iconContainer: {
+        width: 50,
+        height: 50,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 25,
+        backgroundColor: "#E5E5E5",
+        marginRight: 15,
+    },
+    icon: {
+        width: 30,
+        height: 30,
+    },
+    textContainer: {
+        flex: 1,
     },
     title: {
-        fontSize: 24,
-        marginBottom: 16,
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    subtitle: {
+        fontSize: 14,
+        color: "#888",
+    },
+    buttonContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 20,
+    },
+    saveButton: {
+        backgroundColor: "#4CAF50",
+        padding: 15,
+        flex: 1,
+        marginRight: 10,
+        alignItems: "center",
+        borderRadius: 5,
+    },
+    cancelButton: {
+        backgroundColor: "#007BFF",
+        padding: 15,
+        flex: 1,
+        marginLeft: 10,
+        alignItems: "center",
+        borderRadius: 5,
+    },
+    buttonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold",
     },
 });
 
-export default MyMenuHomeScreen;
+export default ProfileHomeScreen;

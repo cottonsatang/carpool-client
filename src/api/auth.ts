@@ -56,7 +56,7 @@ const postSignUp = async (signupData: RequestSignUpUser): Promise<void> => {
     console.log("API 함수로 전달받은 데이터:", JSON.stringify(signupData, null, 2));
 
     try {
-        const response = await axiosInstance.post("/auth/signup", signupData);
+        const response = await axiosInstance.post("http://10.0.2.2:3000/auth/signup", signupData);
         console.log("서버 응답:", response.data);
         return response.data;
     } catch (error) {
@@ -79,7 +79,7 @@ const postLogIn = async ({name, password}: RequestUser): Promise<ResponseToken> 
     });
 
     try {
-        const { data } = await axiosInstance.post('/auth/signin', { name, password });
+        const { data } = await axiosInstance.post('http://10.0.2.2:3000/auth/signin', { name, password });
         return data;
     } catch (error) {
         console.error("postLogin - Error:", error);
@@ -88,13 +88,13 @@ const postLogIn = async ({name, password}: RequestUser): Promise<ResponseToken> 
 };
 
 const getProfile = async (): Promise<ResponseProfile> => {
-    const {data} = await axiosInstance.get('/auth/me');
+    const {data} = await axiosInstance.get('http://10.0.2.2:3000/auth/me');
     return data;
 };
 
 const getAccessToken = async (): Promise<ResponseToken> => {
     const refreshToken = await getEncryptStorage('refreshToken');
-    const {data} = await axiosInstance.get('/auth/refresh', {
+    const {data} = await axiosInstance.get('http://10.0.2.2:3000/auth/refresh', {
         headers: {
             Authorization: `Bearer ${refreshToken}`,
         },
@@ -103,14 +103,14 @@ const getAccessToken = async (): Promise<ResponseToken> => {
 };
 
 const logout = async () => {
-    await axiosInstance.post('/auth/logout');
+    await axiosInstance.post('http://10.0.2.2:3000/auth/logout');
 };
 
 const sendVerificationCode = async (email: string): Promise<string> => {
     try {
         console.log('Sending verification code request:', email);
         console.log("API_URL: ", Config.API_URL);
-        const response = await axiosInstance.post("/mail/send-code", {
+        const response = await axiosInstance.post("http://10.0.2.2:3000/mail/send-code", {
             email: email.trim()  // 이메일을 서버에 전달
         });
 
@@ -133,7 +133,7 @@ const verifyCode = async (email: string, code: string): Promise<boolean> => {
     try {
         console.log('Verifying code:', {email, code});
 
-        const response = await axiosInstance.post('/mail/verify-code', {
+        const response = await axiosInstance.post('http://10.0.2.2:3000/mail/verify-code', {
             email: email.trim(),
             code: code.trim()  // 입력된 코드 전달
         });
