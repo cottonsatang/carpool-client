@@ -1,70 +1,88 @@
-import {useMutation, useQuery,} from "@tanstack/react-query";
-import {getAccessToken, getProfile, logout, postLogIn, postSignUp} from "../../api/auth";
-import {UseMutationCustomOptions, UseQueryCustomOptions} from "../../types/common";
-import {getEncryptStorage, removeEncryptStorage, setEncryptStorage} from "../../utils";
-import {removeHeader, setHeader} from "../../utils/headers";
-import {useEffect} from "react";
-import queryClient from "../../api/queryClient";
-import {numbers, queryKeys, storageKeys} from "../../constants";
-import axiosInstance from "../../api/axios";
+import {useMutation, useQuery} from '@tanstack/react-query';
+import {
+  getAccessToken,
+  getProfile,
+  logout,
+  postLogIn,
+  postSignUp, ResponseProfile,
+} from '../../api/auth';
+import {
+  UseMutationCustomOptions,
+  UseQueryCustomOptions,
+} from '../../types/common';
+import {
+  getEncryptStorage,
+  removeEncryptStorage,
+  setEncryptStorage,
+} from '../../utils';
+import {removeHeader, setHeader} from '../../utils/headers';
+import {useEffect, useMemo} from 'react';
+import queryClient from '../../api/queryClient';
+import {numbers, queryKeys, storageKeys} from '../../constants';
+import axiosInstance from '../../api/axios';
+import RNRestart from 'react-native-restart';
 
 function useSignup(mutationOptions?: UseMutationCustomOptions) {
-    return useMutation({
-        mutationFn: postSignUp,
-        ...mutationOptions,
-    }); //onError: (error) => error,response.data.message ...로 구성됨  UseMutationCustomOptions에 정의함
+  return useMutation({
+    mutationFn: postSignUp,
+    ...mutationOptions,
+  }); //onError: (error) => error,response.data.message ...로 구성됨  UseMutationCustomOptions에 정의함
 }
 
 function useLogin(mutationOptions?: UseMutationCustomOptions) {
-    return useMutation({
-        mutationFn: postLogIn,
-        onSuccess: ({accessToken, refreshToken}) => {
-            setEncryptStorage('refreshToken', refreshToken);
-            setHeader('Authorization', `Bearer ${accessToken}`);
-        },
-        onSettled: () => {
-            queryClient.refetchQueries({queryKey: [queryKeys.AUTH, queryKeys.GET_ACCESS_TOKEN]});
-            queryClient.invalidateQueries({queryKey: [queryKeys.AUTH, queryKeys.GET_PROFILE]});
-        },
-        ...mutationOptions,
-    });
+  return useMutation({
+    mutationFn: postLogIn,
+    onSuccess: ({accessToken, refreshToken}) => {
+      setEncryptStorage('refreshToken', refreshToken);
+      setHeader('Authorization', `Bearer ${accessToken}`);
+    },
+    onSettled: () => {
+      queryClient.refetchQueries({
+        queryKey: [queryKeys.AUTH, queryKeys.GET_ACCESS_TOKEN],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [queryKeys.AUTH, queryKeys.GET_PROFILE],
+      });
+    },
+    ...mutationOptions,
+  });
 }
 
 function useGetRefreshToken() {
-    const {isSuccess, data, isError} = useQuery({
-        queryKey: [queryKeys.AUTH, queryKeys.GET_ACCESS_TOKEN],
-        queryFn: getAccessToken,
-        staleTime: numbers.ACCESS_TOKEN_REFRESH_DURATION,
-        refetchInterval: numbers.ACCESS_TOKEN_REFRESH_DURATION,
-        refetchOnReconnect: true,
-        refetchIntervalInBackground: true,
-    });
+  const {isSuccess, data, isError} = useQuery({
+    queryKey: [queryKeys.AUTH, queryKeys.GET_ACCESS_TOKEN],
+    queryFn: getAccessToken,
+    staleTime: numbers.ACCESS_TOKEN_REFRESH_DURATION,
+    refetchInterval: numbers.ACCESS_TOKEN_REFRESH_DURATION,
+    refetchOnReconnect: true,
+    refetchIntervalInBackground: true,
+  });
 
-    useEffect(() => {
-        if (isSuccess) {
-            setHeader('Authorization', `Bearer ${data.accessToken}`);
-            setEncryptStorage(storageKeys.REFRESH_TOKEN, data.refreshToken);
-        }
-    }, [isSuccess]);
+  useEffect(() => {
+    if (isSuccess) {
+      setHeader('Authorization', `Bearer ${data.accessToken}`);
+      setEncryptStorage(storageKeys.REFRESH_TOKEN, data.refreshToken);
+    }
+  }, [isSuccess]);
 
-    useEffect(() => {
-        if (isError) { //실패한다면
-            removeHeader('Authorization');
-            removeEncryptStorage(storageKeys.REFRESH_TOKEN);
-        }
-    }, [isError]);
+  useEffect(() => {
+    if (isError) {
+      //실패한다면
+      removeHeader('Authorization');
+      removeEncryptStorage(storageKeys.REFRESH_TOKEN);
+    }
+  }, [isError]);
 
-    return {isSuccess, isError};
+  return {isSuccess, isError};
 }
 
 //type UseQueryCustomOptions <=> UseQueryOptions
 function useGetProfile(queryOptions?: UseQueryCustomOptions) {
-    return useQuery({
-        queryKey: [queryKeys.AUTH, queryKeys.GET_PROFILE],
-        queryFn: getProfile,
-        staleTime: Infinity,
-        ...queryOptions,
-    });
+  return useQuery({
+    queryKey: [queryKeys.AUTH, queryKeys.GET_PROFILE],
+    queryFn: getProfile,
+    ...queryOptions,
+  });
 } //로그인 한 뒤에는 프로필도 가져와야함
 
 // function useLogout(mutationOptions?: UseMutationCustomOptions) {
@@ -82,34 +100,46 @@ function useGetProfile(queryOptions?: UseQueryCustomOptions) {
 // } ---> removeEncryptStorgage가 async라 따로 적용함
 
 function useLogout(mutationOptions?: UseMutationCustomOptions) {
-    return useMutation({
-        mutationFn: async () => {
-            const response = await axiosInstance.post('/auth/logout');  // 로그아웃 요청을 서버에 먼저 보냄
-            console.log('Logout response:', response.data); // 요청이 성공했는지 확인
-
-            removeHeader('Authorization');// 요청 성공 후 헤더와 스토리지 정리
-            await removeEncryptStorage(storageKeys.REFRESH_TOKEN);
-            queryClient.resetQueries({queryKey: [queryKeys.AUTH]});
-        },
-        onSettled: () => {// 관련 쿼리 무효화하여 캐시 초기화
-            queryClient.invalidateQueries({queryKey: [queryKeys.AUTH]});
-        },
-        ...mutationOptions
-    });
+  return useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      removeHeader('Authorization');
+      removeEncryptStorage(storageKeys.REFRESH_TOKEN);
+      queryClient.resetQueries({queryKey: [queryKeys.AUTH]});
+      queryClient.clear();
+      RNRestart.Restart();
+    },
+    ...mutationOptions,
+  });
 }
 
-
 function useAuth() {
-    const signupMutation = useSignup();
-    const refreshTokenQuery = useGetRefreshToken();
-    const getProfileQuery = useGetProfile({
-        enabled: refreshTokenQuery.isSuccess, //refreshToken 요청이 성공하면 프로필 쿼리도 가져오기
-    });
-    const isLogin = getProfileQuery.isSuccess;
-    const loginMutation = useLogin();
-    const logoutMutation = useLogout();
+  const signupMutation = useSignup();
+  const loginMutation = useLogin();
+  const logoutMutation = useLogout();
 
-    return {isLogin, loginMutation, signupMutation, getProfileQuery, logoutMutation};
+  const refreshTokenQuery = useGetRefreshToken();
+  const getProfileQuery = useGetProfile({
+    enabled: refreshTokenQuery.isSuccess, // refreshToken이 성공한 경우에만 프로필 쿼리 실행
+  });
+
+  const isLoading = getProfileQuery.isLoading;
+
+  const isLogin = getProfileQuery.isSuccess;
+  const role = useMemo(() => {
+    if (!getProfileQuery.data) return undefined;
+    return (getProfileQuery.data as ResponseProfile)?.role;
+  }, [getProfileQuery.data]);
+
+  return {
+    isLoading,
+    isLogin,
+    loginMutation,
+    signupMutation,
+    getProfileQuery,
+    logoutMutation,
+    role
+  };
 }
 
 export default useAuth;

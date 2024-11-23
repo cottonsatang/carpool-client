@@ -1,5 +1,4 @@
 import axiosInstance from "./axios";
-import {Category, Profile} from "../types/domain";
 import {getEncryptStorage} from "../utils";
 import {AxiosError} from "axios";
 import Config from "react-native-config";

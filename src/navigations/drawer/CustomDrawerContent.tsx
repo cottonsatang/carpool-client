@@ -16,46 +16,59 @@ import useAuth from '../../hooks/queries/useAuth';
 import {ResponseProfile} from '../../api/auth';
 
 function CustomDrawerContent(props: DrawerContentComponentProps) {
-  const {getProfileQuery} = useAuth();
-  const {name, profile} = (getProfileQuery.data as ResponseProfile) || {};
+  const {logoutMutation, getProfileQuery} = useAuth();
+  const {name, profile, role} = (getProfileQuery.data as ResponseProfile) || {};
   const imageUrl = profile?.profilePicture || '';
-  const {logoutMutation} = useAuth();
+
+  const getRoleText = (userRole?: 'driver' | 'passenger') => {
+    switch (userRole) {
+      case 'driver':
+        return '드라이버';
+      case 'passenger':
+        return '탑승자';
+      default:
+        return 'Loading or Network Error';
+    }
+  };
 
   const handleLogout = () => {
     logoutMutation.mutate(null);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <DrawerContentScrollView
-        {...props}
-        contentContainerStyle={styles.contentContainer}>
-        <View style={styles.profileContainer}>
-          <View style={styles.imageWrapper}>
-            {imageUrl && imageUrl !== '' ? (
-              <Image
-                source={{uri: imageUrl}}
-                style={styles.profileImage}
-                resizeMode="cover"
-              />
-            ) : (
-              <Image
-                source={require('../../asset/user-profile-default.png')}
-                style={styles.profileImage}
-                resizeMode="cover"
-              />
-            )}
+      <SafeAreaView style={styles.container}>
+        <DrawerContentScrollView
+            {...props}
+            contentContainerStyle={styles.contentContainer}>
+          <View style={styles.profileContainer}>
+            <View style={styles.imageWrapper}>
+              {imageUrl && imageUrl !== '' ? (
+                  <Image
+                      source={{uri: imageUrl}}
+                      style={styles.profileImage}
+                      resizeMode="cover"
+                  />
+              ) : (
+                  <Image
+                      source={require('../../asset/user-profile-default.png')}
+                      style={styles.profileImage}
+                      resizeMode="cover"
+                  />
+              )}
+            </View>
+            <Text style={styles.nameText}>{name || '익명'}</Text>
+            <Text style={styles.roleText}>
+              {getRoleText(role)}
+            </Text>
           </View>
-          <Text style={styles.nameText}>{name || '익명'}</Text>
-        </View>
-        <View style={styles.drawerItemList}>
-          <DrawerItemList {...props} />
-        </View>
-        <Pressable onPress={handleLogout} style={styles.logoutButton}>
-          <Text style={styles.logoutText}>로그아웃</Text>
-        </Pressable>
-      </DrawerContentScrollView>
-    </SafeAreaView>
+          <View style={styles.drawerItemList}>
+            <DrawerItemList {...props} />
+          </View>
+          <Pressable onPress={handleLogout} style={styles.logoutButton}>
+            <Text style={styles.logoutText}>로그아웃</Text>
+          </Pressable>
+        </DrawerContentScrollView>
+      </SafeAreaView>
   );
 }
 
@@ -73,6 +86,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.GRAY_300,
+    gap: 8,
   },
   imageWrapper: {
     width: 80,
@@ -103,6 +117,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.RED_500,
   },
+  roleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.GRAY_500,
+  }
 });
 
 export default CustomDrawerContent;

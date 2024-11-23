@@ -1,6 +1,5 @@
 const mainNavigations = {
   HOME: 'Home',
-  FEED: 'Feed',
   PROFILE: 'Profile',
 } as const;
 
