@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     SafeAreaView,
     StyleSheet,
@@ -12,24 +12,51 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
+import useAuth from "../../hooks/queries/useAuth";
 
-function ProfileHomeScreen({ route }: { route: any }) {
+function MyMenuHomeScreen() {
     const navigation = useNavigation();
+    const { getProfileQuery } = useAuth();
 
-    const initialState = {
-        role: route?.params?.role === "운전자" ? "운전자" : "탑승자",
-        phoneNumber: "01012345678",
-        model: "현대 소나타",
-        licensePlate: "12가1234",
-        seatingCapacity: "4",
-        points: 150,
+    // 프로필 정보를 서버에서 가져온 후 기본값으로 설정
+    const initialProfileData = getProfileQuery.data || {
+        role: "탑승자", // 기본 역할 설정
+        name: "", // 사용자 이름 (아이디)
+        email: "",
+        phoneNumber: "",
+        vehicleInfo: {
+            model: "",
+            licensePlate: "",
+            seatingCapacity: "",
+        },
     };
 
-    const [state, setState] = useState(initialState);
-    const [phoneNumber, setPhoneNumber] = useState(state.phoneNumber);
-    const [model, setModel] = useState(state.model);
-    const [licensePlate, setLicensePlate] = useState(state.licensePlate);
-    const [seatingCapacity, setSeatingCapacity] = useState(state.seatingCapacity);
+    const [state, setState] = useState(initialProfileData);
+    const [phoneNumber, setPhoneNumber] = useState(initialProfileData.phoneNumber);
+    const [model, setModel] = useState(initialProfileData.vehicleInfo?.model || "");
+    const [licensePlate, setLicensePlate] = useState(initialProfileData.vehicleInfo?.licensePlate || "");
+    const [seatingCapacity, setSeatingCapacity] = useState(initialProfileData.vehicleInfo?.seatingCapacity || "");
+
+    useEffect(() => {
+        // 프로필 정보가 변경되면 상태 업데이트
+        if (getProfileQuery.data) {
+            setState(getProfileQuery.data);
+            setPhoneNumber(getProfileQuery.data.phoneNumber);
+            if (getProfileQuery.data.vehicleInfo) {
+                setModel(getProfileQuery.data.vehicleInfo.model);
+                setLicensePlate(getProfileQuery.data.vehicleInfo.licensePlate);
+                setSeatingCapacity(getProfileQuery.data.vehicleInfo.seatingCapacity);
+            }
+        }
+    }, [getProfileQuery.data]);
+
+    if (getProfileQuery.isLoading) {
+        return <Text>Loading...</Text>; // 데이터가 로드 중일 때
+    }
+
+    if (getProfileQuery.isError) {
+        return <Text>Error loading profile data.</Text>; // 에러가 발생한 경우
+    }
 
     const handleGoBack = () => {
         Alert.alert(
@@ -43,13 +70,16 @@ function ProfileHomeScreen({ route }: { route: any }) {
     };
 
     const handleSaveChanges = () => {
+        // 서버에 변경된 정보를 저장하는 로직을 추가해야 합니다.
         Alert.alert("알림", "변경이 완료되었습니다.");
         setState({
             ...state,
             phoneNumber,
-            model,
-            licensePlate,
-            seatingCapacity,
+            vehicleInfo: {
+                model,
+                licensePlate,
+                seatingCapacity,
+            },
         });
     };
 
@@ -62,9 +92,9 @@ function ProfileHomeScreen({ route }: { route: any }) {
                   text: "확인",
                   onPress: () => {
                       setPhoneNumber(state.phoneNumber);
-                      setModel(state.model);
-                      setLicensePlate(state.licensePlate);
-                      setSeatingCapacity(state.seatingCapacity);
+                      setModel(state.vehicleInfo?.model || "");
+                      setLicensePlate(state.vehicleInfo?.licensePlate || "");
+                      setSeatingCapacity(state.vehicleInfo?.seatingCapacity || "");
                   },
               },
               { text: "취소", style: "cancel" },
@@ -82,30 +112,27 @@ function ProfileHomeScreen({ route }: { route: any }) {
 
     return (
       <SafeAreaView style={styles.container}>
-          {/* 뒤로가기 버튼 */}
           <Pressable style={styles.backButton} onPress={handleGoBack}>
               <Icon name="arrow-back" size={24} color="#000" />
           </Pressable>
 
-          {/* 프로필 정보 */}
           <ScrollView contentContainerStyle={styles.scrollContent}>
               <View style={styles.profileHeader}>
                   <View style={styles.profileImageContainer}>
                       <Image
-                        source={{ uri: "https://via.placeholder.com/80" }} // 임시 프로필 이미지
+                        source={{ uri: "https://via.placeholder.com/80" }}
                         style={styles.profileImage}
                       />
                   </View>
-                  <Text style={styles.profileName}>닉네임</Text>
+                  {/* 닉네임으로 사용자 아이디(name)를 표시 */}
+                  <Text style={styles.profileName}>{state.name}</Text>
               </View>
 
-              {/* 고정 정보 */}
               <View style={styles.infoContainer}>
                   <Text style={styles.infoText}>역할: {state.role}</Text>
-                  <Text style={styles.infoText}>이메일: example@example.com</Text>
+                  <Text style={styles.infoText}>이메일: {state.email}</Text>
               </View>
 
-              {/* 변경 가능한 정보 */}
               <View style={styles.editableInfoContainer}>
                   <TextInput
                     style={styles.input}
@@ -141,13 +168,11 @@ function ProfileHomeScreen({ route }: { route: any }) {
                   )}
               </View>
 
-              {/* 포인트 내역 및 이용 내역 */}
               <View style={styles.boxContainer}>
-                  {/* 포인트 내역 */}
                   <Pressable style={styles.box} onPress={handleViewPointsHistory}>
                       <View style={styles.iconContainer}>
                           <Image
-                            source={{ uri: "https://via.placeholder.com/40" }} // 포인트 아이콘
+                            source={{ uri: "https://via.placeholder.com/40" }}
                             style={styles.icon}
                           />
                       </View>
@@ -158,11 +183,10 @@ function ProfileHomeScreen({ route }: { route: any }) {
                       <Icon name="chevron-forward" size={24} color="#000" />
                   </Pressable>
 
-                  {/* 이용 내역 */}
                   <Pressable style={styles.box} onPress={handleViewUsageHistory}>
                       <View style={styles.iconContainer}>
                           <Image
-                            source={{ uri: "https://via.placeholder.com/40" }} // 이용 내역 아이콘
+                            source={{ uri: "https://via.placeholder.com/40" }}
                             style={styles.icon}
                           />
                       </View>
@@ -174,7 +198,6 @@ function ProfileHomeScreen({ route }: { route: any }) {
                   </Pressable>
               </View>
 
-              {/* 변경 및 취소 버튼 */}
               <View style={styles.buttonContainer}>
                   <Pressable style={styles.saveButton} onPress={handleSaveChanges}>
                       <Text style={styles.buttonText}>변경</Text>
@@ -311,4 +334,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ProfileHomeScreen;
+export default MyMenuHomeScreen;
