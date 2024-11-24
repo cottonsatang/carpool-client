@@ -2,6 +2,8 @@ const mainNavigations = {
   HOME: 'Home',
   FEED: 'Feed',
   PROFILE: 'Profile',
+  POINTS_HISTORY: 'PointsHistory', // 포인트 내역 경로 추가
+  USAGE_HISTORY: 'UsageHistory',   // 이용 내역 경로 추가
 } as const;
 
 const authNavigations = {

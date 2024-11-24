@@ -20,10 +20,11 @@ function MyMenuHomeScreen() {
 
     // 프로필 정보를 서버에서 가져온 후 기본값으로 설정
     const initialProfileData = getProfileQuery.data || {
-        role: "탑승자", // 기본 역할 설정
+        role: "passenger", // 기본 역할 설정
         name: "", // 사용자 이름 (아이디)
         email: "",
         phoneNumber: "",
+        profilePicture: "",
         vehicleInfo: {
             model: "",
             licensePlate: "",
@@ -40,13 +41,13 @@ function MyMenuHomeScreen() {
     useEffect(() => {
         // 프로필 정보가 변경되면 상태 업데이트
         if (getProfileQuery.data) {
-            setState(getProfileQuery.data);
-            setPhoneNumber(getProfileQuery.data.phoneNumber);
-            if (getProfileQuery.data.vehicleInfo) {
-                setModel(getProfileQuery.data.vehicleInfo.model);
-                setLicensePlate(getProfileQuery.data.vehicleInfo.licensePlate);
-                setSeatingCapacity(getProfileQuery.data.vehicleInfo.seatingCapacity);
-            }
+            const profileData = getProfileQuery.data;
+
+            setState(profileData);
+            setPhoneNumber(profileData.phoneNumber);
+            setModel(profileData.vehicleInfo?.model || "");
+            setLicensePlate(profileData.vehicleInfo?.licensePlate || "");
+            setSeatingCapacity(profileData.vehicleInfo?.seatingCapacity || "");
         }
     }, [getProfileQuery.data]);
 
@@ -103,11 +104,11 @@ function MyMenuHomeScreen() {
     };
 
     const handleViewPointsHistory = () => {
-        navigation.navigate("PointsHistoryScreen");
+        navigation.navigate("PointsHistory");
     };
 
     const handleViewUsageHistory = () => {
-        navigation.navigate("UsageHistoryScreen");
+        navigation.navigate("UsageHistory");
     };
 
     return (
@@ -119,18 +120,27 @@ function MyMenuHomeScreen() {
           <ScrollView contentContainerStyle={styles.scrollContent}>
               <View style={styles.profileHeader}>
                   <View style={styles.profileImageContainer}>
-                      <Image
-                        source={{ uri: "https://via.placeholder.com/80" }}
-                        style={styles.profileImage}
-                      />
+                      {state.profilePicture && state.profilePicture !== '' ? (
+                        <Image
+                          source={{ uri: state.profilePicture }}
+                          style={styles.profileImage}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <Image
+                          source={require('../../asset/user-profile-default.png')}
+                          style={styles.profileImage}
+                          resizeMode="cover"
+                        />
+                      )}
                   </View>
                   {/* 닉네임으로 사용자 아이디(name)를 표시 */}
                   <Text style={styles.profileName}>{state.name}</Text>
               </View>
 
               <View style={styles.infoContainer}>
-                  <Text style={styles.infoText}>역할: {state.role}</Text>
-                  <Text style={styles.infoText}>이메일: {state.email}</Text>
+                  <Text style={styles.infoText}>Role: {state.role}</Text>
+                  <Text style={styles.infoText}>Email: {state.email}</Text>
               </View>
 
               <View style={styles.editableInfoContainer}>
@@ -141,31 +151,32 @@ function MyMenuHomeScreen() {
                     onChangeText={(text) => setPhoneNumber(text.replace(/[^0-9]/g, ""))}
                     keyboardType="numeric"
                   />
-                  {state.role === "운전자" && (
-                    <>
-                        <TextInput
-                          style={styles.input}
-                          placeholder="차량 모델 입력"
-                          value={model}
-                          onChangeText={setModel}
-                        />
-                        <TextInput
-                          style={styles.input}
-                          placeholder="차량 번호판 입력"
-                          value={licensePlate}
-                          onChangeText={setLicensePlate}
-                        />
-                        <TextInput
-                          style={styles.input}
-                          placeholder="좌석 수 입력"
-                          value={seatingCapacity}
-                          onChangeText={(text) =>
-                            setSeatingCapacity(text.replace(/[^0-9]/g, ""))
-                          }
-                          keyboardType="numeric"
-                        />
-                    </>
-                  )}
+                  <>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="차량 모델 입력"
+                        value={model}
+                        onChangeText={setModel}
+                        editable={state.role === "driver"} // 운전자만 수정 가능
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="차량 번호판 입력"
+                        value={licensePlate}
+                        onChangeText={setLicensePlate}
+                        editable={state.role === "driver"} // 운전자만 수정 가능
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="좌석 수 입력"
+                        value={seatingCapacity}
+                        onChangeText={(text) =>
+                          setSeatingCapacity(text.replace(/[^0-9]/g, ""))
+                        }
+                        keyboardType="numeric"
+                        editable={state.role === "driver"} // 운전자만 수정 가능
+                      />
+                  </>
               </View>
 
               <View style={styles.boxContainer}>
