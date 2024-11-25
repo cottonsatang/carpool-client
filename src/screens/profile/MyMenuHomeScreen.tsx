@@ -182,9 +182,11 @@ function MyMenuHomeScreen() {
               <View style={styles.boxContainer}>
                   <Pressable style={styles.box} onPress={handleViewPointsHistory}>
                       <View style={styles.iconContainer}>
+                          {/* 이미지 추가 */}
                           <Image
-                            source={{ uri: "https://via.placeholder.com/40" }}
-                            style={styles.icon}
+                            source={require('../../asset/point-history-tema.png')}
+                            style={styles.emptyImage}
+                            resizeMode="contain"
                           />
                       </View>
                       <View style={styles.textContainer}>
@@ -196,9 +198,11 @@ function MyMenuHomeScreen() {
 
                   <Pressable style={styles.box} onPress={handleViewUsageHistory}>
                       <View style={styles.iconContainer}>
+                          {/* 이미지 추가 */}
                           <Image
-                            source={{ uri: "https://via.placeholder.com/40" }}
-                            style={styles.icon}
+                            source={require('../../asset/user-history-tema.png')}
+                            style={styles.emptyImage}
+                            resizeMode="contain"
                           />
                       </View>
                       <View style={styles.textContainer}>

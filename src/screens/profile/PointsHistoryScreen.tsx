@@ -18,9 +18,11 @@ const PointsHistoryScreen = () => {
 
       {pointsHistory.length === 0 ? (
         <View style={styles.emptyContainer}>
+          {/* 이미지 추가 */}
           <Image
-            source={{ uri: 'https://via.placeholder.com/100' }}
-            style={styles.emptyIcon}
+            source={require('../../asset/user-history.png')}
+            style={styles.emptyImage}
+            resizeMode="contain"
           />
           <Text style={styles.emptyText}>포인트 내역이 없습니다.</Text>
         </View>

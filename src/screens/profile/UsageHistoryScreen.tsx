@@ -1,46 +1,87 @@
-import React from "react";
-import {
-  SafeAreaView,
-  StyleSheet,
-  View,
-  Text,
-  Image,
-} from "react-native";
+import React from 'react';
+import { SafeAreaView, StyleSheet, Text, View, FlatList, Image, Pressable } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
 
-function UsageHistoryScreen() {
+const UsageHistoryScreen = () => {
+  const navigation = useNavigation();
+  const usageHistory = []; // 현재 이용 내역이 없으면 빈 배열로 설정
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.emptyContainer}>
-        {/* 이미지 추가 */}
-        <Image
-          source={require('../../asset/user-history.png')}
-          style={styles.emptyImage}
-          resizeMode="contain"
-        />
-        <Text style={styles.emptyText}>이용 내역이 없습니다.</Text>
+      <View style={styles.header}>
+        <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={24} color="#000" />
+        </Pressable>
+        <Text style={styles.headerTitle}>이용 내역</Text>
       </View>
+
+      {usageHistory.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          {/* 이미지 추가 */}
+          <Image
+            source={require('../../asset/user-history.png')}
+            style={styles.emptyImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.emptyText}>이용 내역이 없습니다.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={usageHistory}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.historyItem}>
+              <Text>{item}</Text>
+            </View>
+          )}
+        />
+      )}
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#fff',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 20,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
   },
   emptyContainer: {
-    alignItems: "center",
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  emptyImage: {
-    width: 150, // 이미지의 너비를 지정
-    height: 150, // 이미지의 높이를 지정
-    marginBottom: 20,
+  emptyIcon: {
+    width: 60,
+    height: 60,
+    marginBottom: 10,
   },
   emptyText: {
     fontSize: 16,
-    color: "#888",
+    color: '#000',
+  },
+  historyItem: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
 });
 
