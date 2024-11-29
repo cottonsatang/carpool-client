@@ -2,6 +2,8 @@ import axiosInstance from "./axios";
 import {getEncryptStorage} from "../utils";
 import {AxiosError} from "axios";
 import Config from "react-native-config";
+import queryClient from "./queryClient";
+import {queryKeys} from "../constants";
 
 interface ApiError {
     message: string;
@@ -76,9 +78,9 @@ const postLogIn = async ({name, password}: RequestUser): Promise<ResponseToken> 
         method: "POST",
         data: { name, password }
     });
-
     try {
         const { data } = await axiosInstance.post('/auth/signin', { name, password });
+        console.log("login data: ", data);
         return data;
     } catch (error) {
         console.error("postLogin - Error:", error);

@@ -33,8 +33,9 @@ function useLogin(mutationOptions?: UseMutationCustomOptions) {
   return useMutation({
     mutationFn: postLogIn,
     onSuccess: ({accessToken, refreshToken}) => {
-      setEncryptStorage('refreshToken', refreshToken);
+      queryClient.removeQueries({queryKey: [queryKeys.GET_PROFILE]});
       setHeader('Authorization', `Bearer ${accessToken}`);
+      setEncryptStorage('refreshToken', refreshToken);
     },
     onSettled: () => {
       queryClient.refetchQueries({
@@ -107,7 +108,6 @@ function useLogout(mutationOptions?: UseMutationCustomOptions) {
       removeEncryptStorage(storageKeys.REFRESH_TOKEN);
       queryClient.resetQueries({queryKey: [queryKeys.AUTH]});
       queryClient.clear();
-      RNRestart.Restart();
     },
     ...mutationOptions,
   });
@@ -120,7 +120,7 @@ function useAuth() {
 
   const refreshTokenQuery = useGetRefreshToken();
   const getProfileQuery = useGetProfile({
-    enabled: refreshTokenQuery.isSuccess, // refreshToken이 성공한 경우에만 프로필 쿼리 실행
+    enabled: refreshTokenQuery.isSuccess && loginMutation.isSuccess, // refreshToken이 성공한 경우에만 프로필 쿼리 실행
   });
 
   const isLoading = getProfileQuery.isLoading;
