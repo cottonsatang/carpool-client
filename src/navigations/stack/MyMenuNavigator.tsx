@@ -15,7 +15,7 @@ const Stack = createStackNavigator<MyMenuStackParamList>();
 function MyMenuNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="MyMenu" component={MyMenuHomeScreen} />
+      <Stack.Screen name="MyMenuHome" component={MyMenuHomeScreen} />
       <Stack.Screen name="PointsHistory" component={PointsHistoryScreen} />
       <Stack.Screen name="UsageHistory" component={UsageHistoryScreen} />
     </Stack.Navigator>

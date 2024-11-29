@@ -19,6 +19,8 @@ import stationLocations from "../../constants/stationlocations";
 import BottomDrawer from "../../components/BottomDrawer";
 import MarkerModal from "../../components/MarkerModal";
 import useMatching, {useGetMatchingStatus} from "../../hooks/queries/useMatching";
+import FavoriteButton from "../../components/FavoriteButton" // 즐겨찾기 버튼
+import FavoriteModal from '../../components/FavoriteModal';   // 즐겨찾기 모달
 
 type Navigation = CompositeNavigationProp<
     StackNavigationProp<MapStackParamList>,
@@ -41,6 +43,51 @@ function MapHomeScreen() {
     const { data: matchingStatus } = useGetMatchingStatus(matchId ?? '', {
         enabled: !!matchId,
     });
+    // 즐겨찾기 기능
+    const [isFavoriteModalVisible, setFavoriteModalVisible] = useState(false);
+    const [favorites, setFavorites] = useState<
+      { id: string; startPoint: string; endPoint: string }[]
+    >([]);
+
+    const handleAddFavorite = (startPoint: string, endPoint: string) => {
+        setFavorites((prev) => [
+            ...prev,
+            { id: Date.now().toString(), startPoint, endPoint },
+        ]);
+        Alert.alert('즐겨찾기 추가 완료', `출발지: ${startPoint}, 목적지: ${endPoint}`);
+    };
+
+    // 즐겨찾기 삭제 함수
+    const handleDeleteFavorite = (id: string) => {
+        setFavorites((prev) => prev.filter((fav) => fav.id !== id));
+    };
+
+    // 즐겨찾기 선택 함수
+    const handleFavoriteSelect = (startPoint: string, endPoint: string) => {
+        // 출발지와 목적지를 설정
+        const start = stationlocations.find(
+          (station) => station.name === startPoint
+        )?.id; // id로 설정 (number)
+        const end = stationlocations.find(
+          (station) => station.name === endPoint
+        )?.id; // id로 설정 (number)
+
+        if (start !== undefined && end !== undefined) {
+            setStartPoint(start);
+            setEndPoint(end);
+
+            // 해당 출발지와 목적지의 좌표로 지도 이동
+            const startCoordinate = stationlocations[start]?.coordinate;
+            const endCoordinate = stationlocations[end]?.coordinate;
+
+            if (startCoordinate && endCoordinate) {
+                moveMapView(startCoordinate);
+                setTimeout(() => moveMapView(endCoordinate), 500); // 목적지 좌표로 잠시 후 이동
+            } else {
+                Alert.alert('오류', '좌표를 찾을 수 없습니다.');
+            }
+        }
+    };
 
     usePermission('LOCATION');
 
@@ -78,6 +125,10 @@ function MapHomeScreen() {
         setEndPoint(selectedMarker);
         Alert.alert('도착지 설정', `${stationLocations[selectedMarker!].name}이(가) 도착지로 설정되었습니다.`);
         setIsModalVisible(false);
+    };
+    // 즐겨찾기 버튼 핸들러
+    const handleFavoriteButtonPress = () => {
+        setFavoriteModalVisible(true);
     };
 
     const handleMatchRequest = async () => {
@@ -136,6 +187,16 @@ function MapHomeScreen() {
         if (startPoint !== null && endPoint !== null) {
             const start = stationLocations[startPoint].coordinate;
             const end = stationLocations[endPoint].coordinate;
+
+            if (!start || !end) { // 시작점이나 끝점이 잘못되었을 경우 처리
+                console.warn('Invalid startPoint or endPoint');
+                Alert.alert(
+                  '오류',
+                  '선택한 출발지나 목적지가 유효하지 않습니다. 다시 선택해주세요.'
+                );
+                return [];
+            }
+
             return [start, end];
         }
         return [];
@@ -198,6 +259,8 @@ function MapHomeScreen() {
                 >
                     <MaterialIcons name="refresh" color={colors.WHITE} size={25} />
                 </Pressable>
+                {/* 즐겨찾기 버튼 */}
+                <FavoriteButton onPress={() => setFavoriteModalVisible(true)} />
             </View>
             {(startPoint !== null && endPoint !== null) && (
                 <Pressable
@@ -242,6 +305,15 @@ function MapHomeScreen() {
                 onCancel={isMatching ? handleCancel : () => setIsDrawerVisible(false)}
                 onMatchStart={handleMatchRequest}
                 isMatching={isMatching}
+            />
+            {/* 즐겨찾기 모달 */}
+            <FavoriteModal
+              visible={isFavoriteModalVisible}
+              onClose={() => setFavoriteModalVisible(false)}
+              onSelect={handleFavoriteSelect}
+              onAddFavorite={handleAddFavorite}
+              favorites={favorites}
+              onDeleteFavorite={handleDeleteFavorite}  // 삭제 함수 전달
             />
         </>
     );

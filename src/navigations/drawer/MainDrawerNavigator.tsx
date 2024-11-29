@@ -1,21 +1,17 @@
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import FeedHomeScreen from '../../screens/feed/FeedHomeScreen';
-import MyMenuHomeScreen from '../../screens/profile/MyMenuHomeScreen';
 import MapStackNavigator, {MapStackParamList} from '../stack/MapStackNavigator';
 import {colors, mainNavigations} from '../../constants';
 import {NavigatorScreenParams, RouteProp} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {Dimensions} from "react-native";
 import CustomDrawerContent from "./CustomDrawerContent";
-import PointsHistoryScreen from '../../screens/profile/PointsHistoryScreen'; //포인트 내역 추가
-import UsageHistoryScreen from '../../screens/profile/UsageHistoryScreen'; // 이용 내역 추가
+import MyMenuNavigator from '../stack/MyMenuNavigator';
 
 export type MainDrawerParamList = {
   [mainNavigations.HOME]: NavigatorScreenParams<MapStackParamList>;
   [mainNavigations.FEED]: undefined;
   [mainNavigations.PROFILE]: undefined;
-  [mainNavigations.POINTS_HISTORY]: undefined;  // 포인트 내역 추가
-  [mainNavigations.USAGE_HISTORY]: undefined;   // 이용 내역 추가
 };
 
 const Drawer = createDrawerNavigator<MainDrawerParamList>();
@@ -34,14 +30,6 @@ function DrawerIcons(route: RouteProp<MainDrawerParamList>, focused:boolean) {
     case mainNavigations.PROFILE: {
         iconName = 'person';
         break;
-    }
-    case mainNavigations.POINTS_HISTORY: {
-      iconName = 'history';
-      break;
-    }
-    case mainNavigations.USAGE_HISTORY: {
-      iconName = 'timeline';
-      break;
     }
   }
   return <MaterialIcons name={iconName} size={18} color={focused?colors.BLACK : colors.GRAY_500} />;
@@ -84,23 +72,9 @@ function MainDrawerNavigator() {
       />
       <Drawer.Screen
         name={mainNavigations.PROFILE}
-        component={MyMenuHomeScreen}
+        component={MyMenuNavigator}
         options={{
           title: '마이메뉴',
-        }}
-      />
-      <Drawer.Screen
-        name={mainNavigations.POINTS_HISTORY}
-        component={PointsHistoryScreen}
-        options={{
-          title: '포인트 내역',
-        }}
-      />
-      <Drawer.Screen
-        name={mainNavigations.USAGE_HISTORY}
-        component={UsageHistoryScreen}
-        options={{
-          title: '이용 내역',
         }}
       />
     </Drawer.Navigator>

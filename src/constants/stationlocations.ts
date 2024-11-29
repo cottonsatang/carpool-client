@@ -11,7 +11,7 @@ export interface StationLocation {
 const StationLocations: StationLocation[] = [
     {
         id: 0,
-        name: '명지대',
+        name: '명지대 자연캠퍼스',
         coordinate: { latitude: 37.222691, longitude: 127.190167 },
         address: '경기도 용인시 처인구 명지로 116 (남동)'
     },

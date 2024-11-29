@@ -10,6 +10,7 @@ import {
 import {colors} from '../constants';
 import type {StationLocation} from '../constants/stationlocations';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import PricingHelpModal from '../components/PricingHelpModal'; // 도움말 기능 추가
 
 interface BottomDrawerProps {
   isVisible: boolean;
@@ -23,19 +24,20 @@ interface BottomDrawerProps {
 }
 
 function BottomDrawer({
-  isVisible,
-  startPoint,
-  endPoint,
-  stations,
-  onSelectStation,
-  onCancel,
-  onMatchStart,
-  isMatching,
-}: BottomDrawerProps) {
+                        isVisible,
+                        startPoint,
+                        endPoint,
+                        stations,
+                        onSelectStation,
+                        onCancel,
+                        onMatchStart,
+                        isMatching,
+                      }: BottomDrawerProps) {
   if (!isVisible) return null;
 
   const inset = useSafeAreaInsets();
   const [currentTime, setCurrentTime] = useState('');
+  const [isHelpModalVisible, setIsHelpModalVisible] = useState(false); //모달 상태
 
   useEffect(() => {
     const updateCurrentTime = () => {
@@ -57,18 +59,26 @@ function BottomDrawer({
     // 컴포넌트 언마운트 시 인터벌 정리
     return () => clearInterval(interval);
   }, []);
+
   return (
+    <>
       <Modal
-          visible={isVisible}
-          transparent
-          animationType="slide"
-          onRequestClose={onCancel}>
+        visible={isVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={onCancel}>
         <TouchableWithoutFeedback onPress={onCancel}>
           <View style={styles.overlay} />
         </TouchableWithoutFeedback>
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.headerTitle}>경로 입력</Text>
+            {/* 도움말 버튼 */}
+            <Pressable
+              onPress={() => setIsHelpModalVisible(true)}
+              style={styles.helpButton}>
+              <Text style={styles.helpButtonText}>?</Text>
+            </Pressable>
           </View>
           <View style={styles.content}>
             <View style={styles.timeSection}>
@@ -78,43 +88,39 @@ function BottomDrawer({
 
             <View style={styles.locationSection}>
               <Pressable
-                  style={styles.locationButton}
-                  onPress={() => onSelectStation('start')}>
+                style={styles.locationButton}
+                onPress={() => onSelectStation('start')}>
                 <Text style={styles.locationLabel}>출발</Text>
                 <Text style={styles.locationValue}>
                   {startPoint !== null
-                      ? stations[startPoint].name
-                      : '선택하세요'}
+                    ? stations[startPoint].name
+                    : '선택하세요'}
                 </Text>
               </Pressable>
 
               <Pressable
-                  style={styles.locationButton}
-                  onPress={() => onSelectStation('end')}>
+                style={styles.locationButton}
+                onPress={() => onSelectStation('end')}>
                 <Text style={styles.locationLabel}>도착</Text>
                 <Text style={styles.locationValue}>
                   {endPoint !== null
-                      ? stations[endPoint].name
-                      : '선택하세요'}
+                    ? stations[endPoint].name
+                    : '선택하세요'}
                 </Text>
               </Pressable>
             </View>
             <View style={styles.actionButtons}>
               <Pressable
-                  style={[
-                    styles.matchButton,
-                    isMatching && styles.matchingButton
-                  ]}
-                  onPress={onMatchStart}
-              >
+                style={[
+                  styles.matchButton,
+                  isMatching && styles.matchingButton,
+                ]}
+                onPress={onMatchStart}>
                 <Text style={styles.matchButtonText}>
                   {isMatching ? '매칭 중입니다' : '매칭 시작하기'}
                 </Text>
               </Pressable>
-              <Pressable
-                  style={styles.cancelButton}
-                  onPress={onCancel}
-              >
+              <Pressable style={styles.cancelButton} onPress={onCancel}>
                 <Text style={styles.cancelButtonText}>
                   {isMatching ? '매칭 취소하기' : '돌아가기'}
                 </Text>
@@ -123,6 +129,15 @@ function BottomDrawer({
           </View>
         </View>
       </Modal>
+
+      {/* 도움말 모달 */}
+      <PricingHelpModal
+        visible={isHelpModalVisible}
+        onClose={() => setIsHelpModalVisible(false)}
+        startPoint={startPoint !== null ? stations[startPoint].name : null}
+        endPoint={endPoint !== null ? stations[endPoint].name : null}
+      />
+    </>
   );
 }
 
@@ -149,6 +164,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.GRAY_300,
+    flexDirection: 'row', // 도움말 버튼 일렬로 정렬
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
@@ -225,6 +243,16 @@ const styles = StyleSheet.create({
   },
   matchingButton: {
     backgroundColor: colors.GRAY_500,
+  },
+  helpButton: { // 도움말 버튼 디자인
+    backgroundColor: colors.BLUE_500,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+  },
+  helpButtonText: {
+    color: colors.WHITE,
+    fontWeight: 'bold',
   },
 });
 

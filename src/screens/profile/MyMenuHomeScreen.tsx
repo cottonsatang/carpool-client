@@ -24,7 +24,9 @@ function MyMenuHomeScreen() {
         name: "", // 사용자 이름 (아이디)
         email: "",
         phoneNumber: "",
-        profilePicture: "",
+        profile: {
+            profilePicture: "", // 프로필 사진 경로
+        },
         vehicleInfo: {
             model: "",
             licensePlate: "",
@@ -37,13 +39,15 @@ function MyMenuHomeScreen() {
     const [model, setModel] = useState(initialProfileData.vehicleInfo?.model || "");
     const [licensePlate, setLicensePlate] = useState(initialProfileData.vehicleInfo?.licensePlate || "");
     const [seatingCapacity, setSeatingCapacity] = useState(initialProfileData.vehicleInfo?.seatingCapacity || "");
+    const [seatingCapacityError, setSeatingCapacityError] = useState("");
+    const [inputError, setInputError] = useState("");
 
     useEffect(() => {
         // 프로필 정보가 변경되면 상태 업데이트
         if (getProfileQuery.data) {
             const profileData = getProfileQuery.data;
 
-            setState(profileData);
+            setState(getProfileQuery.data);
             setPhoneNumber(profileData.phoneNumber);
             setModel(profileData.vehicleInfo?.model || "");
             setLicensePlate(profileData.vehicleInfo?.licensePlate || "");
@@ -60,18 +64,27 @@ function MyMenuHomeScreen() {
     }
 
     const handleGoBack = () => {
-        Alert.alert(
-          "알림",
-          "변경 사항이 저장되지 않았습니다. 돌아가시겠습니까?",
-          [
-              { text: "확인", onPress: () => navigation.goBack() },
-              { text: "취소", style: "cancel" },
-          ]
-        );
+        // 입력 필드가 비어 있거나 좌석 수가 1에서 6 사이가 아닌 경우 뒤로가기 막기
+        if (!phoneNumber || (state.role === "driver" && (!model || !licensePlate || !seatingCapacity || parseInt(seatingCapacity) < 1 || parseInt(seatingCapacity) > 6))) {
+            Alert.alert("알림", "모든 필드를 올바르게 입력해주세요.");
+            return;
+        }
+        navigation.goBack();
     };
 
     const handleSaveChanges = () => {
-        // 서버에 변경된 정보를 저장하는 로직을 추가해야 합니다.
+        // 입력 필드가 비어 있는지 확인
+        if (!phoneNumber || (state.role === "driver" && (!model || !licensePlate || !seatingCapacity))) {
+            setInputError("모든 필드를 입력해주세요.");
+            return;
+        }
+
+        // 좌석 수가 1에서 6 사이인지 확인
+        if (state.role === "driver" && (parseInt(seatingCapacity) < 1 || parseInt(seatingCapacity) > 6)) {
+            setSeatingCapacityError("좌석 수는 1에서 6 사이여야 합니다.");
+            return;
+        }
+
         Alert.alert("알림", "변경이 완료되었습니다.");
         setState({
             ...state,
@@ -82,6 +95,7 @@ function MyMenuHomeScreen() {
                 seatingCapacity,
             },
         });
+        setInputError("");
     };
 
     const handleCancelChanges = () => {
@@ -96,6 +110,8 @@ function MyMenuHomeScreen() {
                       setModel(state.vehicleInfo?.model || "");
                       setLicensePlate(state.vehicleInfo?.licensePlate || "");
                       setSeatingCapacity(state.vehicleInfo?.seatingCapacity || "");
+                      setSeatingCapacityError("");
+                      setInputError("");
                   },
               },
               { text: "취소", style: "cancel" },
@@ -111,6 +127,17 @@ function MyMenuHomeScreen() {
         navigation.navigate("UsageHistory");
     };
 
+    const handleSeatingCapacityChange = (text) => {
+        const value = text.replace(/[^0-9]/g, "");
+        setSeatingCapacity(value);
+
+        if (parseInt(value) < 1 || parseInt(value) > 6) {
+            setSeatingCapacityError("좌석 수는 1에서 6 사이여야 합니다.");
+        } else {
+            setSeatingCapacityError("");
+        }
+    };
+
     return (
       <SafeAreaView style={styles.container}>
           <Pressable style={styles.backButton} onPress={handleGoBack}>
@@ -120,9 +147,9 @@ function MyMenuHomeScreen() {
           <ScrollView contentContainerStyle={styles.scrollContent}>
               <View style={styles.profileHeader}>
                   <View style={styles.profileImageContainer}>
-                      {state.profilePicture && state.profilePicture !== '' ? (
+                      {state.profile?.profilePicture ? (
                         <Image
-                          source={{ uri: state.profilePicture }}
+                          source={{ uri: state.profile.profilePicture }}
                           style={styles.profileImage}
                           resizeMode="cover"
                         />
@@ -151,32 +178,38 @@ function MyMenuHomeScreen() {
                     onChangeText={(text) => setPhoneNumber(text.replace(/[^0-9]/g, ""))}
                     keyboardType="numeric"
                   />
-                  <>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="차량 모델 입력"
-                        value={model}
-                        onChangeText={setModel}
-                        editable={state.role === "driver"} // 운전자만 수정 가능
-                      />
-                      <TextInput
-                        style={styles.input}
-                        placeholder="차량 번호판 입력"
-                        value={licensePlate}
-                        onChangeText={setLicensePlate}
-                        editable={state.role === "driver"} // 운전자만 수정 가능
-                      />
-                      <TextInput
-                        style={styles.input}
-                        placeholder="좌석 수 입력"
-                        value={seatingCapacity}
-                        onChangeText={(text) =>
-                          setSeatingCapacity(text.replace(/[^0-9]/g, ""))
-                        }
-                        keyboardType="numeric"
-                        editable={state.role === "driver"} // 운전자만 수정 가능
-                      />
-                  </>
+                  {state.role === "driver" && (
+                    <>
+                        <TextInput
+                          style={styles.input}
+                          placeholder="차량 모델 입력"
+                          value={model}
+                          onChangeText={setModel}
+                          editable={state.role === "driver"} // 운전자만 수정 가능
+                        />
+                        <TextInput
+                          style={styles.input}
+                          placeholder="차량 번호판 입력"
+                          value={licensePlate}
+                          onChangeText={setLicensePlate}
+                          editable={state.role === "driver"} // 운전자만 수정 가능
+                        />
+                        <TextInput
+                          style={styles.input}
+                          placeholder="좌석 수 입력 (1-6)"
+                          value={seatingCapacity}
+                          onChangeText={handleSeatingCapacityChange}
+                          keyboardType="numeric"
+                          editable={state.role === "driver"} // 운전자만 수정 가능
+                        />
+                        {seatingCapacityError ? (
+                          <Text style={styles.errorText}>{seatingCapacityError}</Text>
+                        ) : null}
+                    </>
+                  )}
+                  {inputError ? (
+                    <Text style={styles.errorText}>{inputError}</Text>
+                  ) : null}
               </View>
 
               <View style={styles.boxContainer}>
@@ -278,6 +311,12 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
         paddingVertical: 5,
+        marginBottom: 10,
+    },
+    errorText: {
+        color: "red",
+        fontSize: 14,
+        marginTop: -5,
         marginBottom: 10,
     },
     boxContainer: {
