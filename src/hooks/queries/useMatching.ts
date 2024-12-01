@@ -1,7 +1,14 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import {requestMatching, cancelMatching, getMatchingStatus} from "../../api/matching";
-import {queryKeys} from "../../constants";
-import {UseMutationCustomOptions, UseQueryCustomOptions} from "../../types/common";
+import {
+    requestMatching,
+    cancelMatching,
+    getMatchingStatus,
+    agreeToStartRide,
+    completeRide,
+} from "../../api/matching";
+import { queryKeys } from "../../constants";
+import { UseMutationCustomOptions, UseQueryCustomOptions } from "../../types/common";
+
 
 function useRequestMatching(mutationOptions?: UseMutationCustomOptions) {
     return useMutation({
@@ -23,31 +30,51 @@ function useCancelMatching(mutationOptions?: UseMutationCustomOptions) {
     });
 }
 
-function useGetMatchingStatus(matchId: string, queryOptions?: UseQueryCustomOptions) {
+function useGetMatchingStatus(key: string, queryOptions?: UseQueryCustomOptions) {
     return useQuery({
-        queryKey: [queryKeys.MATCHING, 'status', matchId],
-        queryFn: () => getMatchingStatus(matchId),
-        enabled: !!matchId,
-        staleTime: 0,  // 항상 최신 데이터를 가져오기
-        refetchInterval: 5000,  // 5초마다 상태 체크
+        queryKey: [queryKeys.MATCHING, 'status', key],
+        queryFn: () => getMatchingStatus(key),
+        enabled: !!key,
+        staleTime: 0,
+        refetchInterval: 5000,
         ...queryOptions,
+    });
+}
+
+
+function useAgreeToStartRide(mutationOptions?: UseMutationCustomOptions) {
+    return useMutation({
+        mutationFn: agreeToStartRide,
+        onSuccess: (data) => {
+            console.log('운행 동의 성공:', data);
+        },
+        ...mutationOptions,
+    });
+}
+
+function useCompleteRide(mutationOptions?: UseMutationCustomOptions) {
+    return useMutation({
+        mutationFn: completeRide,
+        onSuccess: (data) => {
+            console.log('운행 완료 성공:', data);
+        },
+        ...mutationOptions,
     });
 }
 
 function useMatching() {
     const requestMatchingMutation = useRequestMatching();
     const cancelMatchingMutation = useCancelMatching();
+    const agreeToStartRideMutation = useAgreeToStartRide();
+    const completeRideMutation = useCompleteRide();
 
     return {
         requestMatchingMutation,
         cancelMatchingMutation,
-        useGetMatchingStatus,  // 이건 따로 matchId를 받아야 해서 함수로 제공
+        agreeToStartRideMutation,
+        completeRideMutation,
+        useGetMatchingStatus,
     };
 }
-
-
-//mathcing agree //matching complete
-
-
 
 export { useMatching as default, useGetMatchingStatus };

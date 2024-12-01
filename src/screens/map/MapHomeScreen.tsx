@@ -1,24 +1,28 @@
-import React, { useRef, useState } from 'react';
+import React, {useRef, useState} from 'react';
 import {Alert, Pressable, StyleSheet, Text, View} from 'react-native';
 import MapView, {LatLng, Polyline, PROVIDER_GOOGLE} from 'react-native-maps';
-import { colors } from '../../constants';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {colors} from '../../constants';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import stationlocations from "../../constants/stationlocations";
-import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { MapStackParamList } from '../../navigations/stack/MapStackNavigator';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
-import { MainDrawerParamList } from '../../navigations/drawer/MainDrawerNavigator';
+import stationlocations from '../../constants/stationlocations';
+import stationLocations from '../../constants/stationlocations';
+import {CompositeNavigationProp, useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {MapStackParamList} from '../../navigations/stack/MapStackNavigator';
+import {DrawerNavigationProp} from '@react-navigation/drawer';
+import {MainDrawerParamList} from '../../navigations/drawer/MainDrawerNavigator';
 import useUserLocation from '../../hooks/useUserLocation';
 import usePermission from '../../hooks/usePermission';
 import mapStyle from '../../style/mapStyle';
-import CustomMarker from "../../components/CustomMarkers";
-import stationLocations from "../../constants/stationlocations";
-import BottomDrawer from "../../components/BottomDrawer";
-import MarkerModal from "../../components/MarkerModal";
-import useMatching, {useGetMatchingStatus} from "../../hooks/queries/useMatching";
+import CustomMarker from '../../components/CustomMarkers';
+import BottomDrawer from '../../components/BottomDrawer';
+import MarkerModal from '../../components/MarkerModal';
+import useMatching, {
+  useGetMatchingStatus,
+} from '../../hooks/queries/useMatching';
+import {getMatchingStatus} from '../../api/matching';
+import {MatchingStatus} from '../../constants/matchingStatus';
 
 type Navigation = CompositeNavigationProp<
     StackNavigationProp<MapStackParamList>,
@@ -85,22 +89,32 @@ function MapHomeScreen() {
             Alert.alert('오류', '출발지와 도착지를 모두 설정해주세요.');
             return;
         }
+        if (isMatching) {
+            Alert.alert('오류', '이미 매칭 요청이 진행 중입니다.');
+            return;
+        }
+
         try {
+            setIsMatching(true); // 매칭 상태 활성화
             const response = await requestMatchingMutation.mutateAsync({
                 startPoint,
                 endPoint,
                 requestTime: new Date().toISOString(),
             });
 
-            setMatchId(response.matchId);
-            setIsMatching(true);
-            setIsDrawerVisible(false);
-            Alert.alert('매칭 요청', '매칭이 요청되었습니다.');
+            if (response.status === MatchingStatus.Waiting || response.status === MatchingStatus.Matched) {
+                setMatchId(response.matchId || null);
+                Alert.alert('매칭 요청', response.message);
+            } else {
+                Alert.alert('매칭 오류', response.message || '매칭 요청에 실패했습니다.');
+            }
         } catch (error) {
             Alert.alert(
                 '오류',
                 error instanceof Error ? error.message : '매칭 요청 중 문제가 발생했습니다.'
             );
+        } finally {
+            setIsMatching(false); // 매칭 상태 초기화
         }
     };
 

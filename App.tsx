@@ -10,7 +10,6 @@ import Config from "react-native-config";
 
 
 function App() {
-    console.log("Config ", Config);
     return (
         <QueryClientProvider client={queryClient}>
             <NavigationContainer>

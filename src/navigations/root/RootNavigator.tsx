@@ -11,7 +11,6 @@ function RootNavigator() {
         return <LoadingScreen />;
     }
     console.log("role: ", role);
-    console.log(queryClient.getQueryCache().findAll());
     return (
         <>
             {isLogin ? <MainDrawerNavigator /> : <AuthStackNavigator />}
