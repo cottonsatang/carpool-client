@@ -1,5 +1,5 @@
 type UserInformation = {
-    name: string;
+    username: string;
     password: string;
 };
 
@@ -18,8 +18,8 @@ function validateUserInformation(values: UserInformation): Record<keyof UserInfo
         name: '',
         password: '',
     };
-    if (values.name.length < 4 || values.name.length > 20) {
-        errors.name = '아이디는 4~20자 사이여야 합니다.';
+    if (values.username.length < 4 || values.username.length > 20) {
+        errors.username = '아이디는 4~20자 사이여야 합니다.';
     }
 
     if (!/^[a-zA-Z0-9]*$/.test(values.password)) {

@@ -14,7 +14,7 @@ function LogInScreen() {
 
     const login = useForm({
         initialValue: {
-            name: '',
+            username: '',
             password: '',
         },
         validate: validateLogin,
@@ -31,13 +31,13 @@ function LogInScreen() {
                     <InputField
                         autoFocus={true}
                         placeholder="아이디"
-                        error={login.errors.name}
-                        touched={login.touched.name}
+                        error={login.errors.username}
+                        touched={login.touched.username}
                         inputMode="email"
                         returnKeyType="next"
                         blurOnSubmit={false}
                         onSubmitEditing={() => passwordRef.current?.focus()}
-                        {...login.getTextInputProps('name')}
+                        {...login.getTextInputProps('username')}
                     />
                     <InputField
                         ref={passwordRef}

@@ -1,4 +1,4 @@
-import {useMutation, useQuery} from '@tanstack/react-query';
+import {useMutation, useQuery} from "@tanstack/react-query";
 import {
   getAccessToken,
   getProfile,
@@ -19,8 +19,7 @@ import {removeHeader, setHeader} from '../../utils/headers';
 import {useEffect, useMemo} from 'react';
 import queryClient from '../../api/queryClient';
 import {numbers, queryKeys, storageKeys} from '../../constants';
-import axiosInstance from '../../api/axios';
-import RNRestart from 'react-native-restart';
+
 
 function useSignup(mutationOptions?: UseMutationCustomOptions) {
   return useMutation({
@@ -33,9 +32,9 @@ function useLogin(mutationOptions?: UseMutationCustomOptions) {
   return useMutation({
     mutationFn: postLogIn,
     onSuccess: ({accessToken, refreshToken}) => {
-      queryClient.removeQueries({queryKey: [queryKeys.GET_PROFILE]});
       setHeader('Authorization', `Bearer ${accessToken}`);
       setEncryptStorage('refreshToken', refreshToken);
+
     },
     onSettled: () => {
       queryClient.refetchQueries({
@@ -53,7 +52,7 @@ function useGetRefreshToken() {
   const {isSuccess, data, isError} = useQuery({
     queryKey: [queryKeys.AUTH, queryKeys.GET_ACCESS_TOKEN],
     queryFn: getAccessToken,
-    staleTime: numbers.ACCESS_TOKEN_REFRESH_DURATION,
+    staleTime: 0,
     refetchInterval: numbers.ACCESS_TOKEN_REFRESH_DURATION,
     refetchOnReconnect: true,
     refetchIntervalInBackground: true,
@@ -71,6 +70,7 @@ function useGetRefreshToken() {
       //실패한다면
       removeHeader('Authorization');
       removeEncryptStorage(storageKeys.REFRESH_TOKEN);
+      queryClient.clear();
     }
   }, [isError]);
 
@@ -79,6 +79,7 @@ function useGetRefreshToken() {
 
 //type UseQueryCustomOptions <=> UseQueryOptions
 function useGetProfile(queryOptions?: UseQueryCustomOptions) {
+  queryClient.removeQueries({queryKey: [queryKeys.GET_PROFILE]});
   return useQuery({
     queryKey: [queryKeys.AUTH, queryKeys.GET_PROFILE],
     queryFn: getProfile,
@@ -105,8 +106,10 @@ function useLogout(mutationOptions?: UseMutationCustomOptions) {
     mutationFn: logout,
     onSuccess: () => {
       removeHeader('Authorization');
+      removeEncryptStorage(storageKeys.ACCESS_TOKEN);
       removeEncryptStorage(storageKeys.REFRESH_TOKEN);
       queryClient.resetQueries({queryKey: [queryKeys.AUTH]});
+      queryClient.removeQueries();
       queryClient.clear();
     },
     ...mutationOptions,

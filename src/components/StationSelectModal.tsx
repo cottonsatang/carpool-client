@@ -49,7 +49,7 @@ function StationSelectModal({
             }}
         >
             <View style={styles.stationContent}>
-                <Text style={styles.stationName}>{item.name}</Text>
+                <Text style={styles.stationName}>{item.stationName}</Text>
                 <Text style={styles.stationAddress}>{item.address}</Text> {/* 주소 표시 */}
                 <Text style={styles.stationDistance}>
                     거리: {calculateDistance(item.coordinate)}

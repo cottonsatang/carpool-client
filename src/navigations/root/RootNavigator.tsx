@@ -3,6 +3,7 @@ import AuthStackNavigator from "../stack/AuthStackNavigator";
 import MainDrawerNavigator from "../drawer/MainDrawerNavigator";
 import useAuth from "../../hooks/queries/useAuth";
 import LoadingScreen from "../../screens/LoadingScreen";
+import queryClient from "../../api/queryClient";
 
 function RootNavigator() {
     const {isLogin, isLoading, role} = useAuth(); // hook
@@ -10,6 +11,7 @@ function RootNavigator() {
         return <LoadingScreen />;
     }
     console.log("role: ", role);
+    console.log(queryClient.getQueryCache().findAll());
     return (
         <>
             {isLogin ? <MainDrawerNavigator /> : <AuthStackNavigator />}

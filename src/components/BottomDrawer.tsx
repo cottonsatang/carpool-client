@@ -83,7 +83,7 @@ function BottomDrawer({
                 <Text style={styles.locationLabel}>출발</Text>
                 <Text style={styles.locationValue}>
                   {startPoint !== null
-                      ? stations[startPoint].name
+                      ? stations[startPoint].stationName
                       : '선택하세요'}
                 </Text>
               </Pressable>
@@ -94,7 +94,7 @@ function BottomDrawer({
                 <Text style={styles.locationLabel}>도착</Text>
                 <Text style={styles.locationValue}>
                   {endPoint !== null
-                      ? stations[endPoint].name
+                      ? stations[endPoint].stationName
                       : '선택하세요'}
                 </Text>
               </Pressable>

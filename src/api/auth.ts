@@ -13,14 +13,14 @@ interface ApiError {
 
 // Request types
 type RequestUser = {
-    name: string;
+    username: string;
     password: string;
 };
 
 type RequestSignUpUser = {
     email: string;
     password: string;
-    name: string;
+    username: string;
     phoneNumber: string;
     role: 'driver' | 'passenger';
     vehicleInfo?: {
@@ -37,7 +37,7 @@ type ResponseToken = {
 };
 
 type ResponseProfile = {
-    name: string;
+    username: string;
     email: string;
     phoneNumber: string;
     role: 'driver' | 'passenger';
@@ -73,13 +73,13 @@ const postSignUp = async (signupData: RequestSignUpUser): Promise<void> => {
     }
 };
 
-const postLogIn = async ({name, password}: RequestUser): Promise<ResponseToken> => {
+const postLogIn = async ({username, password}: RequestUser): Promise<ResponseToken> => {
     console.log("postLogin - Request:", {
         method: "POST",
-        data: { name, password }
+        data: { username: username, password }
     });
     try {
-        const { data } = await axiosInstance.post('/auth/signin', { name, password });
+        const { data } = await axiosInstance.post('/auth/signin', { username: username, password });
         console.log("login data: ", data);
         return data;
     } catch (error) {

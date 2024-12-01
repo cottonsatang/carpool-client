@@ -36,7 +36,7 @@ function SignUpScreen() {
     const signup = useForm({
         initialValue: {
             email: email, // 이메일 상태를 초기값으로 설정
-            name: '',
+            username: '',
             password: '',
             passwordConfirm: '',
             phoneNumber: '',
@@ -51,7 +51,7 @@ function SignUpScreen() {
     const handleSubmit = () => {
         const {
             email,
-            name,
+            username,
             password,
             passwordConfirm,
             phoneNumber,
@@ -62,7 +62,7 @@ function SignUpScreen() {
         } = signup.values;
 
         // 유효성 검사
-        if (!name || name.length < 4 || name.length > 20) {
+        if (!username || username.length < 4 || username.length > 20) {
             return Alert.alert('알림', '아이디는 4~20자 사이여야 합니다.');
         }
 
@@ -81,7 +81,7 @@ function SignUpScreen() {
         // 기본 회원가입 데이터
         const signupData: {
             email: string;
-            name: string;
+            username: string;
             password: string;
             phoneNumber: string;
             role: 'driver' | 'passenger';
@@ -92,7 +92,7 @@ function SignUpScreen() {
             };
         } = {
             email,
-            name,
+            username: username,
             password,
             phoneNumber,
             role: role as unknown as 'driver' | 'passenger',
@@ -115,7 +115,7 @@ function SignUpScreen() {
             {
                 onSuccess: () => {
                     Alert.alert('알림', '회원가입이 완료되었습니다.');
-                    loginMutation.mutate({ name, password });
+                    loginMutation.mutate({ username: username, password });
                 },
                 onError: (error) => {
                     Alert.alert('회원가입 실패', error.message || '회원가입에 실패했습니다.');
@@ -159,7 +159,7 @@ function SignUpScreen() {
                                 returnKeyType="next"
                                 blurOnSubmit={false}
                                 onSubmitEditing={() => passwordRef.current?.focus()}
-                                {...signup.getTextInputProps("name")}
+                                {...signup.getTextInputProps("username")}
                             />
                             <InputField
                                 ref={passwordRef}

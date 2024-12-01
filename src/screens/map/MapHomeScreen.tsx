@@ -70,13 +70,13 @@ function MapHomeScreen() {
 
     const handleSetStart = () => {
         setStartPoint(selectedMarker);
-        Alert.alert('출발지 설정', `${stationLocations[selectedMarker!].name}이(가) 출발지로 설정되었습니다.`);
+        Alert.alert('출발지 설정', `${stationLocations[selectedMarker!].stationName}이(가) 출발지로 설정되었습니다.`);
         setIsModalVisible(false);
     };
 
     const handleSetEnd = () => {
         setEndPoint(selectedMarker);
-        Alert.alert('도착지 설정', `${stationLocations[selectedMarker!].name}이(가) 도착지로 설정되었습니다.`);
+        Alert.alert('도착지 설정', `${stationLocations[selectedMarker!].stationName}이(가) 도착지로 설정되었습니다.`);
         setIsModalVisible(false);
     };
 
@@ -160,7 +160,7 @@ function MapHomeScreen() {
                     <CustomMarker
                         key={location.id}
                         coordinate={location.coordinate}
-                        name={location.name} // name prop 추가
+                        name={location.stationName} // name prop 추가
                         color={
                             startPoint === location.id
                                 ? 'RED'
@@ -221,7 +221,7 @@ function MapHomeScreen() {
                 visible={isModalVisible}
                 name={
                     selectedMarker !== null && stationLocations[selectedMarker]
-                        ? stationLocations[selectedMarker].name
+                        ? stationLocations[selectedMarker].stationName
                         : 'Unknown'
                 }
                 address={

@@ -2,7 +2,7 @@ import React from 'react';
 import {SafeAreaView, StyleSheet, View} from 'react-native';
 import {StackScreenProps} from '@react-navigation/stack';
 import {AuthStackParamList} from '../../navigations/stack/AuthStackNavigator';
-import {authNavigations} from '../../constants/navigations';
+import {authNavigations} from '../../constants';
 import CustomButton from "../../components/CustomButton";
 import LogoComponent from "../../components/Logo";// 로고 컴포넌트 import
 

@@ -17,7 +17,7 @@ import {ResponseProfile} from '../../api/auth';
 
 function CustomDrawerContent(props: DrawerContentComponentProps) {
   const {logoutMutation, getProfileQuery} = useAuth();
-  const {name, profile, role} = (getProfileQuery.data as ResponseProfile) || {};
+  const {username, profile, role} = (getProfileQuery.data as ResponseProfile) || {};
   const imageUrl = profile?.profilePicture || '';
 
   const getRoleText = (userRole?: 'driver' | 'passenger') => {
@@ -56,7 +56,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
                   />
               )}
             </View>
-            <Text style={styles.nameText}>{name || '익명'}</Text>
+            <Text style={styles.nameText}>{username || '익명'}</Text>
             <Text style={styles.roleText}>
               {getRoleText(role)}
             </Text>
