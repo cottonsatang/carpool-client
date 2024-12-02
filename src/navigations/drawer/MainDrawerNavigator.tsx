@@ -7,11 +7,13 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {Dimensions} from "react-native";
 import CustomDrawerContent from "./CustomDrawerContent";
 import MyMenuNavigator from '../stack/MyMenuNavigator';
+import NotificationScreen from '../../screens/NotificationScreen'; // 알람 화면 import
 
 export type MainDrawerParamList = {
   [mainNavigations.HOME]: NavigatorScreenParams<MapStackParamList>;
   [mainNavigations.FEED]: undefined;
   [mainNavigations.PROFILE]: undefined;
+  [mainNavigations.NOTIFICATION]: undefined; // 알람 화면 타입 추가
 };
 
 const Drawer = createDrawerNavigator<MainDrawerParamList>();
@@ -30,6 +32,10 @@ function DrawerIcons(route: RouteProp<MainDrawerParamList>, focused:boolean) {
     case mainNavigations.PROFILE: {
         iconName = 'person';
         break;
+    }
+    case mainNavigations.NOTIFICATION: { // 알람 아이콘 처리
+      iconName = 'notifications';
+      break;
     }
   }
   return <MaterialIcons name={iconName} size={18} color={focused?colors.BLACK : colors.GRAY_500} />;
@@ -75,6 +81,13 @@ function MainDrawerNavigator() {
         component={MyMenuNavigator}
         options={{
           title: '마이메뉴',
+        }}
+      />
+      <Drawer.Screen
+        name={mainNavigations.NOTIFICATION} // 알림 화면 추가
+        component={NotificationScreen}
+        options={{
+          title: '알림',
         }}
       />
     </Drawer.Navigator>

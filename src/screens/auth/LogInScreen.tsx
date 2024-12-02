@@ -6,11 +6,12 @@ import useForm from "../../hooks/useForm";
 import {validateLogin} from "../../utils";
 import DismissKeyboardView from "../../components/DismissKeyboardView";
 import useAuth from "../../hooks/queries/useAuth";
-
+import { useNotifications } from '../../context/NotificationProvider'; // 알림 관리
 
 function LogInScreen() {
     const passwordRef = useRef<TextInput | null>(null);
     const {loginMutation} = useAuth();
+    const { addNotification } = useNotifications(); // 알림
 
     const login = useForm({
         initialValue: {
@@ -19,10 +20,18 @@ function LogInScreen() {
         },
         validate: validateLogin,
     });
-
+    // 알림 관련 수정
     const handleSubmit = () => {
-        loginMutation.mutate(login.values);
-    }
+        loginMutation.mutate(login.values, {
+            onSuccess: () => {
+                addNotification('로그인했습니다'); // 로그인 성공 시 알림 추가
+            },
+            onError: (error) => {
+                console.log(error); // 로그인 실패 시 에러 처리
+            }
+        });
+    };
+
 
     return (
         <DismissKeyboardView>

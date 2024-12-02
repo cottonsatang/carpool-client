@@ -21,6 +21,7 @@ import MarkerModal from "../../components/MarkerModal";
 import useMatching, {useGetMatchingStatus} from "../../hooks/queries/useMatching";
 import FavoriteButton from "../../components/FavoriteButton" // 즐겨찾기 버튼
 import FavoriteModal from '../../components/FavoriteModal';   // 즐겨찾기 모달
+import NotificationButton from '../../components/NotificationButton';
 
 type Navigation = CompositeNavigationProp<
     StackNavigationProp<MapStackParamList>,
@@ -48,7 +49,6 @@ function MapHomeScreen() {
     const [favorites, setFavorites] = useState<
       { id: string; startPoint: string; endPoint: string }[]
     >([]);
-
     const handleAddFavorite = (startPoint: string, endPoint: string) => {
         setFavorites((prev) => [
             ...prev,
@@ -87,6 +87,10 @@ function MapHomeScreen() {
                 Alert.alert('오류', '좌표를 찾을 수 없습니다.');
             }
         }
+    };
+    // 알람 클릭
+    const handleNotificationPress = () => {
+        navigation.navigate('Notification');  // Notification 화면으로 이동
     };
 
     usePermission('LOCATION');
@@ -259,6 +263,8 @@ function MapHomeScreen() {
                 >
                     <MaterialIcons name="refresh" color={colors.WHITE} size={25} />
                 </Pressable>
+                {/* 알람 아이콘 */}
+                <NotificationButton onPress={handleNotificationPress} />
                 {/* 즐겨찾기 버튼 */}
                 <FavoriteButton onPress={() => setFavoriteModalVisible(true)} />
             </View>
