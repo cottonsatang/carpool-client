@@ -3,11 +3,16 @@ import React from 'react';
 import {StyleSheet} from 'react-native';
 import {mapNavigations} from '../../constants';
 import mapHomeScreen from '../../screens/map/MapHomeScreen';
+import ChatScreen from "../../screens/chat/ChatScreen";
 
 export type MapStackParamList = {
-  [mapNavigations.MAP_HOME]: undefined;
+    [mapNavigations.MAP_HOME]: undefined;
+    [mapNavigations.CHAT]: {
+        roomId: string;
+        token: string;
+        isDriver: boolean;
+    };
 };
-
 const Stack = createStackNavigator();
 
 function MapStackNavigator() {
@@ -34,6 +39,14 @@ function MapStackNavigator() {
           headerShown: false,
         }}
       />
+        <Stack.Screen
+            name={mapNavigations.CHAT}
+            component={ChatScreen}
+            options={{
+                headerTitle: '채팅',
+                headerShown: true,
+            }}
+        />
     </Stack.Navigator>
   );
 }

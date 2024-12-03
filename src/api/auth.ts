@@ -2,8 +2,6 @@ import axiosInstance from "./axios";
 import {getEncryptStorage} from "../utils";
 import {AxiosError} from "axios";
 import Config from "react-native-config";
-import queryClient from "./queryClient";
-import {queryKeys} from "../constants";
 
 interface ApiError {
     message: string;

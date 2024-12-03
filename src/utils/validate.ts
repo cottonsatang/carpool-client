@@ -15,7 +15,7 @@ type SignUpFormValues = UserInformation & {
 
 function validateUserInformation(values: UserInformation): Record<keyof UserInformation, string> {
     const errors: Record<keyof UserInformation, string> = {
-        name: '',
+        username: '',
         password: '',
     };
     if (values.username.length < 4 || values.username.length > 20) {
