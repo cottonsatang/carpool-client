@@ -45,6 +45,8 @@ function MapHomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false); // 바텀 드로워 표시 상태
   const [isMatching, setIsMatching] = useState(false);
+  const [isRiding, setIsRiding] = useState(false);
+
   const {
     requestMatchingMutation,
     cancelMatchingMutation,
@@ -179,13 +181,8 @@ function MapHomeScreen() {
         setRideRequestId(newRideRequestId);
         Alert.alert(
           '매칭 완료',
-          '매칭이 성공적으로 완료되었습니다. 채팅방으로 이동하시겠습니까?',
+          '매칭이 성공적으로 완료되었습니다. 채팅방으로 이동합니다.',
           [
-            {
-              text: '취소',
-              onPress: () => setIsDrawerVisible(true),//여기를 다시 BottomDrawer을 보이게 이전으로 돌려야 함
-              style: 'cancel',
-            },
             {
               text: '확인',
               onPress: () => navigateToChat(newRideRequestId),
@@ -195,6 +192,10 @@ function MapHomeScreen() {
       }
     }
   }, [matchingStatus]);
+
+  const handleCloseDrawer = () => {
+    setIsDrawerVisible(false); // 드로워 닫기
+  };
 
   const handleReset = () => {
     setStartPoint(null);
@@ -270,8 +271,6 @@ function MapHomeScreen() {
 
   const navigateToChat = async (rideRequestId: number) => {
     try {
-      await agreeToStartRideMutation.mutateAsync(rideRequestId);
-
       const token = await getEncryptStorage('accessToken');
 
       navigation.navigate(mapNavigations.CHAT, {
@@ -280,6 +279,7 @@ function MapHomeScreen() {
         isDriver: role === 'driver',
       });
     } catch (error) {
+      console.log("채팅방 입장 오류: ", error);
       Alert.alert('오류', '채팅방 입장에 실패했습니다.');
     }
   };
@@ -316,6 +316,15 @@ function MapHomeScreen() {
   const handleSelectStation = (type: 'start' | 'end') => {
     // 스테이션 선택을 처리하는 로직
     console.log(`Station selection initiated for ${type}`);
+  };
+
+  const handleAgreeToStartRide = async () => {
+    try {
+      await agreeToStartRideMutation.mutateAsync(rideRequestId!);
+      Alert.alert('운행 시작', '운행이 시작되었습니다.');
+    } catch (error) {
+      Alert.alert('오류', '운행 시작 중 문제가 발생했습니다.');
+    }
   };
 
   return (
@@ -409,15 +418,21 @@ function MapHomeScreen() {
         onSetStart={handleSetStart}
         onSetEnd={handleSetEnd}
       />
+
       <BottomDrawer
-        isVisible={isDrawerVisible}
-        startPoint={startPoint}
-        endPoint={endPoint}
-        stations={stationLocations}
-        onSelectStation={handleSelectStation}
-        onCancel={isMatching ? handleCancel : () => setIsDrawerVisible(false)}
-        onMatchStart={handleMatchRequest}
-        isMatching={isMatching}
+          isVisible={isDrawerVisible}
+          startPoint={startPoint}
+          endPoint={endPoint}
+          stations={stationLocations}
+          onSelectStation={handleSelectStation}
+          onCancel={isMatching ? handleCancel : () => setIsDrawerVisible(false)}
+          closeDrawer={() => handleCloseDrawer()}
+          onMatchStart={handleMatchRequest}
+          isMatching={isMatching}
+          isMatched={rideRequestId != null && matchingStatus?.status?.status === 1}
+          onNavigateToChat={() => navigateToChat(rideRequestId!)}
+          onLeaveMatch={() => handleAgreeToStartRide()}
+          role={role}
       />
       {/* 즐겨찾기 모달 */}
       <FavoriteModal

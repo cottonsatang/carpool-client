@@ -19,8 +19,13 @@ interface BottomDrawerProps {
   stations: StationLocation[];
   onSelectStation: (type: 'start' | 'end') => void;
   onCancel: () => void;
+  closeDrawer: () => void;
   onMatchStart: () => void;
   isMatching: boolean; // 매칭 상태 prop 추가
+  isMatched: boolean;
+  onNavigateToChat: () => void;
+  onLeaveMatch: () => void;
+  role: 'driver' | 'passenger' | undefined;
 }
 
 function BottomDrawer({
@@ -30,8 +35,13 @@ function BottomDrawer({
                         stations,
                         onSelectStation,
                         onCancel,
+                        closeDrawer,
                         onMatchStart,
                         isMatching,
+                        isMatched,
+                        onNavigateToChat,
+                        onLeaveMatch,
+                        role,
                       }: BottomDrawerProps) {
   if (!isVisible) return null;
 
@@ -66,8 +76,8 @@ function BottomDrawer({
             visible={isVisible}
             transparent
             animationType="slide"
-            onRequestClose={onCancel}>
-          <TouchableWithoutFeedback onPress={onCancel}>
+            onRequestClose={closeDrawer}>
+          <TouchableWithoutFeedback onPress={closeDrawer}>
             <View style={styles.overlay} />
           </TouchableWithoutFeedback>
           <View style={styles.container}>
@@ -109,23 +119,41 @@ function BottomDrawer({
                   </Text>
                 </Pressable>
               </View>
-              <View style={styles.actionButtons}>
-                <Pressable
-                    style={[
-                      styles.matchButton,
-                      isMatching && styles.matchingButton,
-                    ]}
-                    onPress={onMatchStart}>
-                  <Text style={styles.matchButtonText}>
-                    {isMatching ? '매칭 중입니다' : '매칭 시작하기'}
-                  </Text>
-                </Pressable>
-                <Pressable style={styles.cancelButton} onPress={onCancel}>
-                  <Text style={styles.cancelButtonText}>
-                    {isMatching ? '매칭 취소하기' : '돌아가기'}
-                  </Text>
-                </Pressable>
-              </View>
+
+              {isMatched ? (
+                  <View style={styles.newActionButtons}>
+                    <Pressable
+                        style={styles.chatButton}
+                        onPress={onNavigateToChat}>
+                      <Text style={styles.chatButtonText}>채팅창으로 이동</Text>
+                    </Pressable>
+                    <Pressable
+                        style={styles.agreeButton}
+                        onPress={onLeaveMatch}>
+                      <Text style={styles.agreeButtonText}>
+                        {role === 'driver' ? '운행 시작' : '탑승 완료'}
+                      </Text>
+                    </Pressable>
+                  </View>
+              ) : (
+                  <View style={styles.actionButtons}>
+                    <Pressable
+                        style={[
+                          styles.matchButton,
+                          isMatching && styles.matchingButton,
+                        ]}
+                        onPress={onMatchStart}>
+                      <Text style={styles.matchButtonText}>
+                        {isMatching ? '매칭 중입니다' : '매칭 시작하기'}
+                      </Text>
+                    </Pressable>
+                    <Pressable style={styles.cancelButton} onPress={onCancel}>
+                      <Text style={styles.cancelButtonText}>
+                        {isMatching ? '매칭 취소하기' : '돌아가기'}
+                      </Text>
+                    </Pressable>
+                  </View>
+              )}
             </View>
           </View>
         </Modal>
@@ -253,6 +281,39 @@ const styles = StyleSheet.create({
   helpButtonText: {
     color: colors.WHITE,
     fontWeight: 'bold',
+  },
+  newActionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  chatButton: {
+    flex: 1,
+    backgroundColor: colors.BLUE_500,
+    padding: 12,
+    marginRight: 8,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  chatButtonText: {
+    color: colors.WHITE,
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  agreeButton: {
+    flex: 1,
+    backgroundColor: colors.BLUE_500,
+    padding: 12,
+    marginLeft: 8,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  agreeButtonText: {
+    color: colors.WHITE,
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

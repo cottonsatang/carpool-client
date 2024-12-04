@@ -14,7 +14,7 @@ interface MatchingResponse {
 interface MatchingStatusResponse {
     status: {
         status: MatchingStatus;
-        rideRequestId: number; // -1일 경우 waiting
+        rideRequestId: number; // -1일 경우 아직 그룹화가 안된거임
     };
 }
 
@@ -31,6 +31,7 @@ const cancelMatching = async (key: string): Promise<MatchingResponse> => {
 
 const getMatchingStatus = async (key: string): Promise<MatchingStatusResponse> => {
     const response = await axiosInstance.post('/matching/status', { key });
+    console.log("getMatching request data: ", JSON.stringify(response.data, null, 2));
     return response.data;
 };
 
