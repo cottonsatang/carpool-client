@@ -2,6 +2,8 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
 import Config from "react-native-config";
+import axiosInstance from "../api/axios";
+
 
 interface ChatMessage {
     _id: string;
@@ -13,7 +15,7 @@ interface ChatMessage {
 interface SocketStore {
     socket: Socket | null;
     messages: ChatMessage[];
-    connect: (roomId: string, token: string) => void;
+    connect: (roomId: string) => void;
     disconnect: () => void;
     addMessage: (message: ChatMessage) => void;
 }
@@ -21,7 +23,13 @@ interface SocketStore {
 const useSocketStore = create<SocketStore>((set) => ({
     socket: null,
     messages: [],
-    connect: (roomId, token) => {
+    connect: (roomId) => {
+        const token = axiosInstance.defaults.headers.common['Authorization'];
+
+        if (!token) {
+            console.error('No token found in axios headers');
+            return;
+        }
         const socket = io(`${Config.WEBSOCKET_URL}/chatroom`, {
             query: { roomId },
             extraHeaders: {

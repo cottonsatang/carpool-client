@@ -4,18 +4,18 @@ import useSocketStore from '../../store/SocketStore';
 import useDriverLocationStore from "../../store/DriverLocation";
 import useUserLocation from '../../hooks/useUserLocation'; // 사용자 위치 훅
 
-const ChatScreen = ({ route }: { route: { params: { roomId: string; token: string; isDriver: boolean } } }) => {
-    const { roomId, token, isDriver } = route.params;
+const ChatScreen = ({ route }: { route: { params: { roomId: string; isDriver: boolean } } }) => {
+    const { roomId, isDriver } = route.params;
     const { connect, disconnect, socket, addMessage, messages } = useSocketStore();
     const { setLocation } = useDriverLocationStore();
     const { userLocation, isUserLocationError } = useUserLocation(); // 사용자 위치 가져오기
 
     useEffect(() => {
-        connect(roomId, token);
+        connect(roomId); // 토큰은 useSocketStore에서 axiosInstance에서 자동으로 가져옴
         return () => {
             disconnect();
         };
-    }, [roomId, token, connect, disconnect]);
+    }, [roomId, connect, disconnect]);
 
     useEffect(() => {
         if (socket) {
@@ -79,6 +79,7 @@ const ChatScreen = ({ route }: { route: { params: { roomId: string; token: strin
 };
 
 export default ChatScreen;
+
 
 // {
 //     "userName": "Driver",
