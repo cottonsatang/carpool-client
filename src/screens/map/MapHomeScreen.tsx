@@ -24,6 +24,10 @@ import FavoriteModal from '../../components/FavoriteModal'; // 즐겨찾기 모�
 import NotificationButton from '../../components/NotificationButton';
 import useAuth from '../../hooks/queries/useAuth';
 import {getEncryptStorage} from '../../utils';
+import DriverMarker from "../../components/DriverMarker";
+import driverLocation from "../../store/DriverLocation";
+import DriverLocation from "../../store/DriverLocation";
+import useDriverLocationStore from "../../store/DriverLocation";
 
 type Navigation = CompositeNavigationProp<
   StackNavigationProp<MapStackParamList>,
@@ -51,7 +55,7 @@ function MapHomeScreen() {
   const [matchingKey, setMatchingKey] = useState<string | null>(null);
   const [rideRequestId, setRideRequestId] = useState<number | null>(null);
   const {role} = useAuth();
-
+  const { setLocation } = useDriverLocationStore();
   // @ts-ignore
   const {data: matchingStatus} = useMatchingStatus(matchingKey ?? '', {
     enabled: !!matchingKey,
@@ -346,6 +350,10 @@ function MapHomeScreen() {
             strokeWidth={3} // 선 두께
           />
         )}
+        {/*<DriverMarker coordinate={*/}
+        {/*  //latitude , longtitude 추가*/}
+        {/*  //driverLocation: setLocation   webSocket 연결 이후 메세지에 담긴 latitude, longtitude 추출*/}
+        {/*}/>*/}
       </MapView>
       <Pressable
         style={[styles.drawerButton, {top: inset.top || 20}]}
