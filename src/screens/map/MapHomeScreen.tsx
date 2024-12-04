@@ -179,7 +179,7 @@ function MapHomeScreen() {
           [
             {
               text: '취소',
-              onPress: () => handleLeaveMatch(newRideRequestId),
+              onPress: () => setIsDrawerVisible(true),//여기를 다시 BottomDrawer을 보이게 이전으로 돌려야 함
               style: 'cancel',
             },
             {

@@ -79,3 +79,13 @@ const ChatScreen = ({ route }: { route: { params: { roomId: string; token: strin
 };
 
 export default ChatScreen;
+
+// {
+//     "userName": "Driver",
+//     "message": "Hello",
+//     "coordinate": {
+//     "latitude": 37.7749,
+//         "longitude": -122.4194
+//     }
+// }
+//이런 형식의 메세지로 보내야 함

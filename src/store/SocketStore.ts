@@ -1,6 +1,7 @@
 // store/SocketStore.ts
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
+import Config from "react-native-config";
 
 interface ChatMessage {
     _id: string;
@@ -21,7 +22,7 @@ const useSocketStore = create<SocketStore>((set) => ({
     socket: null,
     messages: [],
     connect: (roomId, token) => {
-        const socket = io(`${process.env.API_URL}/chatroom`, {
+        const socket = io(`${Config.WEBSOCKET_URL}/chatroom`, {
             query: { roomId },
             extraHeaders: {
                 Authorization: `Bearer ${token}`,
