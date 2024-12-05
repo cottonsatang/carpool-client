@@ -1,5 +1,5 @@
 import {createDrawerNavigator} from '@react-navigation/drawer';
-import MyMenuHomeScreen from '../../screens/profile/MyMenuHomeScreen';
+import MyMenuNavigator from '../stack/MyMenuNavigator';
 import MapStackNavigator, {MapStackParamList} from '../stack/MapStackNavigator';
 import {colors, mainNavigations} from '../../constants';
 import {NavigatorScreenParams, RouteProp} from '@react-navigation/native';
@@ -86,7 +86,7 @@ function MainDrawerNavigator() {
       />
       <Drawer.Screen
         name={mainNavigations.PROFILE}
-        component={MyMenuHomeScreen}
+        component={MyMenuNavigator}
         options={{
           title: '마이메뉴',
         }}
